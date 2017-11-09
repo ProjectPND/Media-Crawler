@@ -1,6 +1,7 @@
 from dateutil import parser
 import unicodedata
 import re
+from scrapy import Request
 
 
 class deteksi(object):
@@ -33,7 +34,7 @@ class deteksi(object):
 		if m == 'viva' or m == 'antaranews' or m == 'bisnis' or m == 'liputan6' or m == 'beritasatu' or m == 'sindonews'\
 		 	or m == 'cnnindonesia' or m == 'bbc' or m == 'sinarharapan' or m == 'teropongsenayan'\
 		 	or m == 'katadata' or m == 'fajar' or m == 'analisadaily' or m == 'pikiran' or m == 'merdeka' or m == 'inilah'\
-		 	or m == 'suara':
+		 	or m == 'suara' or m == 'beritajateng' or m == 'tirto' or m == 'rappler' or m == 'beritagar':
 			try:
 				return e[0].strip()
 			except IndexError:
@@ -53,7 +54,7 @@ class deteksi(object):
 				return e[0].split(':')[1].replace('\t','').strip()
 			except IndexError:
 				return '-'
-		if m == 'indopos' or m == 'batamtoday':
+		if m == 'indopos' or m == 'batamtoday' or m == 'bloktuban':
 			try:
 				return e[0].split(':')[1].strip()
 			except IndexError:
@@ -64,7 +65,7 @@ class deteksi(object):
 			except IndexError:
 				return '-'
 		if m == 'harianterbit':
-			return e[-1]
+			return re.sub('[()]','',e[-1])
 		if m == 'kricom':
 			return e[11].strip()
 		if m == 'theconversation':
@@ -75,11 +76,16 @@ class deteksi(object):
 			return e[5].replace('by','').strip()
 		if m == 'kontan':
 			return e[0].split('Editor')[1].strip()
+		if m == 'okezone':
+			return e[0].replace(',','').strip()
+		if m == 'fajaronline':
+			return e[-1].split(':')[-1].strip()
 		else:
-			if not e:
-				return '-'
-			else:
-				return e
+			# if not e:
+			# 	return '-'
+			# else:
+			# 	return e
+			return e
 			
 
 # ================= END ========= #
@@ -124,7 +130,7 @@ class deteksi(object):
 			return "sep"
 		if m == "oktober" or m == "oct" or m == "okt":
 			return "oct"
-		if m == "november" or m == "nov":
+		if m == "november" or m == "nov" or m == 'nopember':
 			return "nov"
 		if m == "desember" or m == "dec":
 			return "dec"
@@ -137,21 +143,20 @@ class deteksi(object):
 				bulan = self.month_name(parse_date[2])
 				t = parse_date[1] + ' ' + bulan + ' ' + \
 					parse_date[3] + ' ' + parse_date[4]
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
 			except IndexError:
 				t = d.replace('WIB','')
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'kompas':
 			# t = d[0].split('-')[1].replace(',','').replace('WIB','')
 			t = self.m_replacer(d[0].split('-')[1], [',','WIB'],'')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'dream':
 			try:
 				parse_date = d[2].split(', ')[1].split(' ')
 				bulan = self.month_name(parse_date[1])
 				t = parse_date[0] + ' ' + bulan + ' ' + \
 					parse_date[2] + ' ' + parse_date[3]
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+				return self.f_date(t)
 			except IndexError:
 				return '-'
 		if m == 'viva' or m == 'suara' or m == 'skalanews' or m == 'analisadaily':
@@ -160,7 +165,7 @@ class deteksi(object):
 				bulan = self.month_name(parse_date[1])
 				t = parse_date[0] + ' ' + bulan + ' ' + \
 					parse_date[2] + ' ' + parse_date[3]
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+				return self.f_date(t)
 			except IndexError:
 				return '-'
 			
@@ -169,137 +174,138 @@ class deteksi(object):
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + \
 				parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
-		if m == 'tribunnews' or m == 's_tribunnews' or m == 'merdeka':
+			return self.f_date(t)
+		if m == 'tribunnews' or m == 's_tribunnews' or m == 'merdeka' or m == 'bloktuban':
 			parse_date = d[0].split(', ')[1].split(' ')
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + \
 				parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'inilah':
 			parse_date = d[2].replace('|', '').replace('WIB', '').strip().split(', ')[1].split(' ')
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + \
 				parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'okezone' or m == 'antaranews' or m == 'tempo' or m == 'harnas':
 			parse_date = d[0].replace(',', '').replace('WIB', '').strip().split(' ')
 			bulan = self.month_name(parse_date[2])
 			t = parse_date[1] + ' ' + bulan + ' ' + \
 				parse_date[3] + ' ' + parse_date[4]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'metrotvnews':
 			t = d[0].split(',')[1].replace('WIB','')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'jpnn':
 			parse_date = unicodedata.normalize('NFKD', unicode(d[0].strip())).encode('ascii','ignore').replace('WIB','').split(',')[1].split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'jawapos':
 			t = d[1].split('|')[0].split(',')[1]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'bisnis':
 			try:
 				bulan = self.month_name(d[0].strip())
 				t = d[1] + ' ' + bulan + ' ' + d[3] + ' ' + d[4].replace('WIB','')
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+				return self.f_date(t)
 			except IndexError:
 				return d
 		if m == 'liputan6':
 			parse_date = d[0].replace(',','').replace('WIB','').split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'beritasatu':
 			parse_date = d[3].replace('|','').replace('WIB','').replace('\t','').split()
 			bulan = self.month_name(parse_date[2])
 			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'rmol':
 			try:
 				parse_date = d[3].replace(',','').replace('|','').replace('WIB','').split()
 				bulan = self.month_name(parse_date[2])
 				t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+				return self.f_date(t)
 			except IndexError:
 				return '-' # different position '.wp-caption-text' example : http://rmol.co/dpr/read/2017/10/26/312606/Semoga,-Implementasi-APBN-2018-Bukan-Sekadar-Pencitraan-
 		if m == 'sindonews':
 			parse_date = d[0].replace(',','').replace('-','').replace('WIB','').split()
 			bulan = self.month_name(parse_date[2])
 			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'cnnindonesia':
 			parse_date = d[2].split('|')[1].split()
 			t = parse_date[1] + ' ' + parse_date[2]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'aktual':
 			parse_date = d[0].replace(',','').split()
 			bulan = self.month_name(parse_date[0])
 			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'indopos':
 			parse_date = d[0].replace(',','').replace('|','').split()
 			bulan = self.month_name(parse_date[2])
 			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'mediaindonesia':
 			t = d[0].split(',')[1].replace('WIB','')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'poskotanews':
 			parse_date = d[0].split(',')[1].replace('WIB','').split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[4]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'harianterbit':
 			parse_date = d[1].split(',')[1].replace('WIB','').split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'sinarharapan':
 			parse_date = d[0].split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'kricom':
-			parse_date = d[8].split()
-			bulan = self.month_name(parse_date[2])
-			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			i = self.f_index(d,'WIB')
+			t = d[i].split()
+			bulan = self.month_name(t[2])
+			t = t[1] + ' ' + bulan + ' ' + t[3] + ' ' + t[4]
+			return self.f_date(t)
 		if m == 'teropongsenayan':
 			parse_date = d[0].split()
 			bulan = self.month_name(parse_date[3])
 			t = parse_date[2] + ' ' + bulan + ' ' + parse_date[4] + ' ' + parse_date[6]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'katadata':
 			parse_date = d[0].split()
 			t = parse_date[1].replace(',','')+' '+parse_date[2].replace('.',':')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
-		if m == 'fajar':
+			return self.f_date(t)
+		if m == 'fajar' or m == 'beritajateng':
 			parse_date = d[0]
 			t = parse_date.replace(',','').replace('@','')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'pikiran':
 			parse_date = d[0].replace(',','').replace('-','').split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'theconversation':
 			parse_date = d[0].replace(',','').replace('.',':').split()
 			bulan = self.month_name(parse_date[0])
 			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
 			try:
-				return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+				return self.f_date(t)
 			except IndexError:
 				return '-'
 		if m == 'jurnas':
 			t = d[0].split('|')[1].split(',')[1].replace('WIB','')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'batamtoday':
 			parse_date = d[0].split('|')
 			t = parse_date[1]+' '+parse_date[2]
 			t = t.replace('WIB','')
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
 		if m == 'rri':
 			t = d[1]
 			return t
@@ -308,13 +314,41 @@ class deteksi(object):
 			bulan = self.month_name(t[1])
 			t = t[0] + ' ' + bulan + ' ' + t[2]
 			# return t
-			return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S')
+			return self.f_date(t)
+		if m == 'independen':
+			t = d[0].split()
+			bulan = self.month_name(t[1])
+			t = t[0] + ' ' + bulan + ' ' + t[2] + ' ' + t[3]
+			return self.f_date(t)
+		if m == 'tirto':
+			try:
+				t = d[0].replace(',','').split()
+				bulan = self.month_name(t[1])
+				t = t[0] + ' ' + bulan + ' ' + t[2]
+				return self.f_date(t)
+			except IndexError:
+				return "-"
+		if m == 'fajaronline':
+			parse_date = d[1].replace(',','').replace('-','').split()
+			bulan = self.month_name(parse_date[1])
+			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
+			return self.f_date(t)
+		if m == 'rappler':
+			t = d[0].replace(',','').split()
+			t = t[3]+' '+t[4]+' '+t[5]+' '+t[1]
+			return self.f_date(t)
+		if m == 'beritagar':
+			t = d[0].replace('WIB','').replace('-','').replace(',','').split()
+			t = t = t[2] + ' ' + self.month_name(t[3]) + ' ' + t[4] + ' ' + t[0]
+			# return self.f_date(t)
+			return self.f_date(t)
 		else:
-			if not d:
-				return '-'
-			else:
-				return d
-		# return parser.parse(t).strftime('%d-%m-%Y %H:%M:%S') # Finding format
+			# if not d:
+			# 	return '-'
+			# else:
+			# 	return d
+			return d
+		# return self.f_date(t) # Finding format
 
 # ====== END ================== #
 # ========== START m_replacer ============= #
@@ -323,4 +357,13 @@ class deteksi(object):
 		for x in a:
 			s = s.replace(x,r)
 		return s
-# ========== START m_replacer ============= #
+# ========== END m_replacer ============= #
+# ========== START Content Paging ============= #
+	def p_content(self,response):
+		# return response.meta.get('t_target')
+		return "ok"
+# ========== END Content Paging ============= #
+	def f_date(self,d):
+		return parser.parse(d).strftime('%Y/%m/%d %H:%M:%S')
+	def f_index(self,a,k):
+		return [idx for idx, s in enumerate(a) if k in s][0]

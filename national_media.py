@@ -8,22 +8,31 @@ from urlparse import urlparse
 from w3lib.html import remove_tags, remove_tags_with_content
 from scrapy.crawler import CrawlerProcess  # For Testing config
 from deteksi import deteksi
+import sys
+from datetime import datetime
 
 with open('config.json', 'r') as f:
 	config = json.load(f)
 
-print "================= INDEX MEDIA ======================"
-print "Choose your media :"
-print config.keys()
-print "===================================================="
+# print "================= INDEX MEDIA ======================"
+# print "Choose your media :"
+# print config.keys()
+# print "===================================================="
+
+# i_config = raw_input("Choose Media: ")
 
 deteksi = deteksi()
 
-i_config = raw_input("Choose Media: ")
+i_config = sys.argv[1]
+t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
+
+# o_config = i_config+'__'+t_now+'.json'
+o_config = i_config+'.json'
+
 
 target = config[i_config]					
 open("log.txt","w").close()
-open("result.json","w").close()
+open(o_config,"w").close()
 
 class MainMediaSpider(scrapy.Spider):
 	name = 'mainmediaspider'
@@ -65,7 +74,7 @@ class MainMediaSpider(scrapy.Spider):
 			method = "GET"
 
 		for url in urls:
-			self.log(url)
+			# self.log(url)
 			yield scrapy.Request(url=url, method=method, callback=self.parse)
 
 	def parse(self, response):
@@ -74,7 +83,6 @@ class MainMediaSpider(scrapy.Spider):
 			lists = response.xpath(xpath).css(target["list"])
 		except KeyError:
 			lists = response.css(target["list"])
-
 
 		for article_list in lists:
 			nextUrl = article_list.css(target["link"]).extract_first()
@@ -102,8 +110,10 @@ class MainMediaSpider(scrapy.Spider):
 
 				tautan = response.url
 				parsed_uri = urlparse(tautan)
-				domain = parsed_uri[1]  # from config or url
-				kanal = parsed_uri[2].split('/')[1]  # from config or url
+				# domain = parsed_uri[1]  # from config or url
+				domain = target['media']  # from config or url
+				kanal = target["category"]  # from config or url
+				# kanal = parsed_uri[2].split('/')[1]  # from config or url
 
 				kode = self.id_hash(tautan)
 
@@ -113,12 +123,30 @@ class MainMediaSpider(scrapy.Spider):
 
 				# JPNN not have author / editor
 				penulis = deteksi.c_editor(content.css(target["author"]).css('::text').extract(), i_config)
-
-				# isi = response.css(target["content"]).css('::text').extract()
-				# isi = response.css(target["content"]).extract() # raw HTML source
-				# isi = remove_tags_with_content(isi[0], ('script', ))
 				# ==================  START : Testing Remove Script from Content ===================== #
+
+				# if target["paging"] is not None:
+				# 	paging = target["paging"]
+				# 	p_URL = response.css(paging[0]).extract()[1:-1]
+				# 	isi = content.css(target["content"])
+				# 	for p in p_URL:
+				# 		# c = deteksi.p_content(p,target["content"])
+				# 		c = Request(response.urljoin(p),callback=deteksi.p_content, meta={'t_content':target["content"]})
+				# 		self.log(c.callback)
+				# else :
+				# 	isi = content.css(target["content"]).extract()
+
 				isi = content.css(target["content"]).extract()
+				# try:
+				# 	for x in target["r_index"]:
+				# 		r_tag = content.css(x).extract()
+				# 		for r in r_tag:
+				# del isi[i]
+				# 			t = unicode(''.join(r))
+				# 			isi = re.sub(t,'',isi)
+				# except KeyError:
+				# 	pass
+
 				isi = unicode(''.join(isi))
 
 				try:
@@ -127,7 +155,7 @@ class MainMediaSpider(scrapy.Spider):
 						for r in r_tag:
 							t = unicode(''.join(r))
 							isi = re.sub(t,'',isi)
-					# self.log(isi)
+					# self.log(t)
 				except KeyError:
 					pass
 				
@@ -136,45 +164,43 @@ class MainMediaSpider(scrapy.Spider):
 				# ================== END : Testing Remove Script from Content ===================== #
 
 				sipnosis = self.synopsis(isi)  # get from content target
-				sipnosis = re.sub(regex,'',sipnosis).strip()
+				try:
+					sipnosis = re.sub(regex,'',sipnosis).strip()
+				except TypeError:
+					pass
 				isi = ' '.join(isi).split()#.strip()
 				isi = ' '.join(isi)
 
 				try:
 					r_content = target["r_content"]
 					for x in r_content:
-						# reg = re.compile(r)
-						# isi = re.sub(r'Aktual.com-','',isi)
 						try:
 							sipnosis = re.sub(x,'',sipnosis)
 							isi = re.sub(x,'',isi)
 						except TypeError:
 							pass
-						# isi = isi.replace(x,'')
-						# self.log(isi)
 				except KeyError:
 					pass
 				isi = re.sub(regex,'',isi).strip()
-				# self.log(isi)
-
-				# isi = unicodedata.normalize('NFKD', unicode(isi))
-				# isi = regex.sub('') # For remove character from reg expression
-				# isi = re.sub(r"\s+", " ", isi, flags=re.UNICODE) # remove whitespaces to one space
 
 				tanggal = deteksi.c_date(content.css(target["date"]).css('::text').extract(), i_config)
 				# self.log(tanggal)
 
 				bahasa = target["lang"]
 
-				yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sipnosis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
+				# isi = content.css(target["content"]).extract()
 
+				if isi is not "" :
+					yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sipnosis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
+				else:
+					self.log({'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sipnosis, 'media': domain, 'kanal': kanal, 'lang': bahasa})
 
 # For Testing config with different format
 
 process = CrawlerProcess({
 	'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
 	'FEED_FORMAT': 'json',
-	'FEED_URI': 'result.json',
+	'FEED_URI': o_config,
 	'DOWNLOAD_DELAY' : 0.25
 })
 
