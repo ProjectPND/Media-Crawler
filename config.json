@@ -529,7 +529,8 @@
         "date": "div.artikel-terkait div.row div.col-xs-12 div.date-publish",
         "content": "div.content-body div.row #body p",
         "synopsis": "div.content-body div.row #body p",
-        "r_index":["(Baca:"],
+        "r_content": ["[(]Baca juga: [])] ","[(]Baca: [)] "],
+        "r_tag": ["p a"],
         "lang": "id"
     },
     "skalanews":
@@ -560,6 +561,8 @@
         "date": ".main-article-content .article-controls .date .calendar-date",
         "content": ".shortcode-content p",
         "synopsis": ".shortcode-content p",
+        "r_content": ["FAJARONLINE.CO.ID, "],
+        "r_index": ["Author :"],
         "lang": "id"
     },
     "fajar":
@@ -590,7 +593,7 @@
         "date": ".chatNews p.dateNews",
         "content": ".chatNews p",
         "synopsis": ".chatNews p",
-        "r_tag": ["p.dateNews","div.bacaJuga","p.ininsial","div#lifeSocial","div.readNewsTag"],
+        "r_tag": ["p.dateNews","p.ininsial","div#lifeSocial p.small","div.readNewsTag p"],
         "r_content": ["Analisadaily "],
         "lang": "id"
     },
@@ -670,6 +673,8 @@
         "date": ".sec-info:nth-child(1) .time",
         "content": ".sec-info p",
         "synopsis": ".sec-info p",
+        "r_content": ["BATAMTODAY.COM, "],
+        "r_index": ["Editor: "],
         "lang": "id"
     },
     "tribratanews":
@@ -763,10 +768,10 @@
         "link": "a::attr('href')",
         "body": "#content .container",
         "title": ".col-title h1.pg-title",
-        "author": "p span",
+        "author": ".authors ul li a",
         "date": "#content div",
-        "content": ".body-container p",
-        "synopsis": ".body-container p",
+        "content": ".body-container .wsw p",
+        "synopsis": ".body-container .wsw p",
         "lang": "id"
     },
     "independen":
@@ -793,10 +798,13 @@
         "link": "div h4 a::attr('href')",
         "body": "#wrapper section #middle article",
         "title": ".entry_content h1",
-        "author": ".lf-ghost span a",
-        "date": ".lf-ghost span.meta_date",
+        "author": "span a",
+        "date": "span.meta_date",
         "content": ".entry_content p",
         "synopsis": ".entry_content p",
+        "r_content": ["Solopos.com, "],
+        "r_tag": ["p em"],
+        "r_index":["<p style"],
         "lang": "id"
     },
     "tirto":

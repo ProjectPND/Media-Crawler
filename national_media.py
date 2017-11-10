@@ -10,6 +10,7 @@ from scrapy.crawler import CrawlerProcess  # For Testing config
 from deteksi import deteksi
 import sys
 from datetime import datetime
+# import unicodedata
 
 with open('config.json', 'r') as f:
 	config = json.load(f)
@@ -27,7 +28,7 @@ i_config = sys.argv[1]
 t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
 
 # o_config = i_config+'__'+t_now+'.json'
-o_config = i_config+'.json'
+o_config = 'data/'+i_config+'.json'
 
 
 target = config[i_config]					
@@ -39,7 +40,8 @@ class MainMediaSpider(scrapy.Spider):
 
 	def log(self,t):
 		file = open('log.txt', 'a')
-		t = unicode(t)
+		# t = unicode(t)
+		t = deteksi.s_undecode(t)
 		file.write(t)
 		file.write('\n')
 		file.close()
@@ -104,6 +106,8 @@ class MainMediaSpider(scrapy.Spider):
 			body = response.css(target["body"])
 
 		tautan = None
+		# self.log(response.css(".container .news-read .article .chatNews #lifeSocial").extract())
+
 
 		for content in body:
 			if tautan != response.url:
@@ -117,7 +121,7 @@ class MainMediaSpider(scrapy.Spider):
 
 				kode = self.id_hash(tautan)
 
-				# self.log(kode)
+				# self.log(content.css("article div.lf-ghost"))
 				judul = ''.join(content.css(target["title"]).css('::text').extract())
 				judul = re.sub(regex,'',judul).strip()
 
@@ -137,25 +141,35 @@ class MainMediaSpider(scrapy.Spider):
 				# 	isi = content.css(target["content"]).extract()
 
 				isi = content.css(target["content"]).extract()
-				# try:
-				# 	for x in target["r_index"]:
-				# 		r_tag = content.css(x).extract()
-				# 		for r in r_tag:
-				# del isi[i]
-				# 			t = unicode(''.join(r))
-				# 			isi = re.sub(t,'',isi)
-				# except KeyError:
-				# 	pass
+				# self.log(isi)
+				try:
+					for x in target["r_index"]:
+						i = deteksi.f_index(isi,x)
+						for li in i:
+							del isi[li]
+						# self.log(x)
+				except KeyError:
+					pass
 
-				isi = unicode(''.join(isi))
-
+				# isi = unicode(''.join(isi))
+				# self.log(isi)
+				isi = deteksi.s_undecode(''.join(isi))
 				try:
 					for x in target["r_tag"]:
 						r_tag = content.css(x).extract()
+						# self.log(content.css(x))
 						for r in r_tag:
 							t = unicode(''.join(r))
+							# t = t.encode('ascii', 'ignore').decode('unicode_escape')
+							t = deteksi.s_undecode(''.join(r)).replace('(','\(').replace(')','\)').replace('/','\/').replace('+','\+')
+							# t = re.escape(t)
+							# t = re.sub(r'[()]')
+							# isi = re.escape(isi)
 							isi = re.sub(t,'',isi)
-					# self.log(t)
+							# isi = deteksi.s_undecode(isi)
+							# isi = deteksi.s_undecode(re.escape(t))
+							# self.log(t)
+							# self.log(isi)
 				except KeyError:
 					pass
 				
@@ -192,6 +206,7 @@ class MainMediaSpider(scrapy.Spider):
 
 				if isi is not "" :
 					yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sipnosis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
+					# yield {'id': tes}
 				else:
 					self.log({'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sipnosis, 'media': domain, 'kanal': kanal, 'lang': bahasa})
 

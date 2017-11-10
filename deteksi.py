@@ -33,13 +33,13 @@ class deteksi(object):
 				return e[1].split(u'\u00a0')[1]
 		if m == 'viva' or m == 'antaranews' or m == 'bisnis' or m == 'liputan6' or m == 'beritasatu' or m == 'sindonews'\
 		 	or m == 'cnnindonesia' or m == 'bbc' or m == 'sinarharapan' or m == 'teropongsenayan'\
-		 	or m == 'katadata' or m == 'fajar' or m == 'analisadaily' or m == 'pikiran' or m == 'merdeka' or m == 'inilah'\
-		 	or m == 'suara' or m == 'beritajateng' or m == 'tirto' or m == 'rappler' or m == 'beritagar':
+		 	or m == 'katadata' or m == 'fajar' or m == 'pikiran' or m == 'merdeka' or m == 'inilah'\
+		 	or m == 'suara' or m == 'beritajateng' or m == 'tirto' or m == 'rappler' or m == 'beritagar' or m == 'solopos':
 			try:
 				return e[0].strip()
 			except IndexError:
 				return '-'
-		if m == 'aktual' :
+		if m == 'aktual' or m == 'analisadaily':
 			try:
 				return re.sub('[()]','',e[0]).strip()
 			except IndexError:
@@ -187,7 +187,7 @@ class deteksi(object):
 			t = parse_date[0] + ' ' + bulan + ' ' + \
 				parse_date[2] + ' ' + parse_date[3]
 			return self.f_date(t)
-		if m == 'okezone' or m == 'antaranews' or m == 'tempo' or m == 'harnas':
+		if m == 'okezone' or m == 'antaranews' or m == 'tempo' or m == 'harnas' or m == 'solopos':
 			parse_date = d[0].replace(',', '').replace('WIB', '').strip().split(' ')
 			bulan = self.month_name(parse_date[2])
 			t = parse_date[1] + ' ' + bulan + ' ' + \
@@ -197,7 +197,8 @@ class deteksi(object):
 			t = d[0].split(',')[1].replace('WIB','')
 			return self.f_date(t)
 		if m == 'jpnn':
-			parse_date = unicodedata.normalize('NFKD', unicode(d[0].strip())).encode('ascii','ignore').replace('WIB','').split(',')[1].split()
+			# parse_date = unicodedata.normalize('NFKD', unicode(d[0].strip())).encode('ascii','ignore').replace('WIB','').split(',')[1].split()
+			parse_date = self.s_undecode(d[0]).replace('WIB','').split(',')[1].split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
 			return self.f_date(t)
@@ -366,4 +367,7 @@ class deteksi(object):
 	def f_date(self,d):
 		return parser.parse(d).strftime('%Y/%m/%d %H:%M:%S')
 	def f_index(self,a,k):
-		return [idx for idx, s in enumerate(a) if k in s][0]
+		# Maybe can use re.search()
+		return [idx for idx, s in enumerate(a) if k in s]
+	def s_undecode(self,s):
+		return unicodedata.normalize('NFKD', unicode(s)).encode('ascii','ignore')
