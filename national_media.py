@@ -27,7 +27,7 @@ deteksi = deteksi()
 i_config = sys.argv[1]
 t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
 
-# o_config = i_config+'__'+t_now+'.json'
+# o_config = 'data/'+i_config+'__'+t_now+'.json'
 o_config = 'data/'+i_config+'.json'
 
 
@@ -37,6 +37,7 @@ open(o_config,"w").close()
 
 class MainMediaSpider(scrapy.Spider):
 	name = 'mainmediaspider'
+	handle_httpstatus_list = [404,503]
 
 	def log(self,t):
 		file = open('log.txt', 'a')
@@ -77,6 +78,9 @@ class MainMediaSpider(scrapy.Spider):
 
 		for url in urls:
 			# self.log(url)
+			# request = scrapy.Request(url=url, method=method, callback=self.parse)
+			# request.meta['proxy'] = "187.188.168.51:52335"
+			# yield request
 			yield scrapy.Request(url=url, method=method, callback=self.parse)
 
 	def parse(self, response):
@@ -85,6 +89,7 @@ class MainMediaSpider(scrapy.Spider):
 			lists = response.xpath(xpath).css(target["list"])
 		except KeyError:
 			lists = response.css(target["list"])
+		# self.log(lists)
 
 		for article_list in lists:
 			nextUrl = article_list.css(target["link"]).extract_first()
@@ -173,7 +178,7 @@ class MainMediaSpider(scrapy.Spider):
 				except KeyError:
 					pass
 				
-				isi = remove_tags_with_content(isi, ('script','style' ))
+				isi = remove_tags_with_content(isi, ('script','style'))
 				isi = Selector(text=isi).xpath('//text()').extract()
 				# ================== END : Testing Remove Script from Content ===================== #
 
@@ -213,10 +218,10 @@ class MainMediaSpider(scrapy.Spider):
 # For Testing config with different format
 
 process = CrawlerProcess({
-	'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
+	'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
 	'FEED_FORMAT': 'json',
 	'FEED_URI': o_config,
-	'DOWNLOAD_DELAY' : 0.25
+	'DOWNLOAD_DELAY' : 0.50
 })
 
 process.crawl(MainMediaSpider)
