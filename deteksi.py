@@ -37,7 +37,9 @@ class deteksi(object):
 		 	or m == 'katadata' or m == 'fajar' or m == 'pikiran' or m == 'merdeka' or m == 'inilah'\
 		 	or m == 'suara' or m == 'beritajateng' or m == 'tirto' or m == 'rappler' or m == 'beritagar' or m == 'solopos'\
 		 	or m == 'tribratanews' or m == 'faktualnews' or m == 'lensaindonesia' or m == 'maduracorner' or m == 'riauonline'\
-		 	or m == 'harianrakyatbengkulu' or m == 'rakyatpos' or m == 'krjogja' or m == 'hargo':
+		 	or m == 'harianrakyatbengkulu' or m == 'rakyatpos' or m == 'krjogja' or m == 'hargo' or m == 'suarakarya' \
+		 	or m == 'jalandamai' or m == 'damailahindonesiaku' or m == 'theconversation' or m == 'dutadamai' or m == 'lombokpost'\
+		 	or m == 'radarposo' or m == 'rakyatsultra' or m == 'radarsulbar' or m == 'ambonekspres' or m == 'utamanews':
 			try:
 				return e[0].strip()
 			except IndexError:
@@ -52,28 +54,28 @@ class deteksi(object):
 				return e[5].replace(':','').replace('\t','').strip()
 			except IndexError:
 				return '-'
-		if m == 'tribunnews' or m == 's_tribunnews':
+		if m == 'tribunnews' or m == 'surabaya.tribunnews':
 			try:
 				return e[0].split(':')[1].replace('\t','').strip()
 			except IndexError:
 				return '-'
-		if m == 'indopos' or m == 'batamtoday' or m == 'bloktuban':
+		if m == 'indopos' or m == 'batamtoday' or m == 'bloktuban' or m == 'gatra':
 			try:
 				return e[0].split(':')[1].strip()
 			except IndexError:
 				return '-'
-		if m == 'harnas':
+		if m == 'harnas' or m == 'nukita':
 			try:
 				return e[1].split(':')[1].strip()
 			except IndexError:
 				return '-'
-		if m == 'harianterbit':
-			return re.sub('[()]','',e[-1])
+		# if m == 'harianterbit':
+		# 	return re.sub('[()]','',e[-1])
 		if m == 'kricom':
 			i = self.f_index(e,'Redaktur:')[0]+1
 			return e[i].strip()
-		if m == 'theconversation':
-			return e[0].strip()
+		# if m == 'theconversation':
+		# 	return e[0].strip()
 		if m == 'jurnas':
 			return e[0].split('|')[0]
 		if m == 'rri':
@@ -87,7 +89,7 @@ class deteksi(object):
 		if m == 'nu':
 			e = e[1].replace('Red:','')
 			return re.sub('[()]','',e)
-		if m == 'berdikari':
+		if m == 'berdikari' or m == 'kahaba':
 			return e[-1].strip()
 		if m == 'covesia':
 			return e[1].strip()
@@ -104,7 +106,7 @@ class deteksi(object):
 			return e
 		if m == 'lampungpro':
 			return e[3].split(':')[1].replace('&nbsp','').strip()
-		if m == 'josstoday' or m == 'jabarnews':
+		if m == 'josstoday' or m == 'bimakini' or m == 'siwalimanews' or m == 'harianterbit':
 			e = e[-1].strip()
 			return re.sub('[(\)]','',e)
 		if m == 'damai':
@@ -112,7 +114,7 @@ class deteksi(object):
 		if m == 'waspada' or m == 'antaranews':
 			e = self.m_replacer(e[0],['Editor',':'],'')
 			return e.strip()
-		if m == 'p_tribunnews' or m == 'k_tribunnews' or m == 'mks_tribunnews':
+		if m == 'palembang.tribunnews' or m == 'kupang.tribunnews' or m == 'makassar.tribunnews':
 			try:
 				e = e[0].split(',')[1]
 			except IndexError:
@@ -126,7 +128,7 @@ class deteksi(object):
 			return e.strip()
 		if m == 'timesindonesia':
 			return e[5].strip()
-		if m == 'bantenraya' or m == 'mnd_tribunnews':
+		if m == 'bantenraya' or m == 'manado.tribunnews' or m == 'harianpilar' or m == 'kalsel.prokal':
 			try:
 				e = e[-1].split()[-1]
 				return re.sub('[(\)]','',e).strip()
@@ -135,13 +137,81 @@ class deteksi(object):
 		if m == 'equator':
 			e = e[-1].split(':')[-1]
 			return e.strip()
-		if m == 'kt_prokal' or m == 'ks_prokal':
+		if m == 'kalteng.prokal':
 			e = ' '.join(e).split('(')[1].replace(')','')
 			return e.strip()
 		if m == 'suaramerdeka':
 			e = re.sub('[()]','',e[0]).split()
 			e = ''.join(e)
 			return e
+		if  m == 'wartabromo':
+			e = e[-2].split()[-1]
+			e = re.sub('[()]','',e)
+			return e
+		if  m == 'jabarnews':
+			e = e[-3]#.split()[-1]
+			if "(" not in e and ")" not in e:
+				e = "-"
+			e = re.sub('[()]','',e)
+			return e
+		if  m == 'batamnews':
+			i = self.f_index(e,'Editor')
+			e = e[i[0]].split(':')[1]
+			return e.strip()
+		# if  m == 'kalsel.prokal':
+		# 	try:
+		# 		e = e[-1].split()[-1]
+		# 		e = re.sub('[()]','',e)
+		# 		return e
+		# 	except IndexError:
+		# 		return "-"
+		if  m == 'kbr':
+			try:
+				return e[1].strip()
+			except IndexError:
+				return e[0].strip()
+		if  m == 'kumparan':
+			try:
+				i = self.f_index(e,'Editor :')[0]+1
+				return e[i]
+			except IndexError:
+				return "-"
+		if  m == 'bnpt':
+			e = e[-1].split()[-1]
+			e = re.sub('[\[\]]','',e)
+			return e
+		if  m == 'padek':
+			i = self.f_index(e,'Editor')
+			e = e[i[0]+1].split('-')[0]
+			return e.strip()
+		if  m == 'malang-post':
+			for x in reversed(e):
+				if "(" in x and")" in x:
+					e = x
+					break
+			e = e.split()[-1]
+			e = re.sub('[()]','',e)
+			return e
+		if m == 'kaltim.prokal':
+			e = ' '.join(e).split()#.strip()
+			e = ' '.join(e).split()[-1]
+			e = re.sub('[()]','',e)
+			return e
+		if m == 'tabloidjubi':
+			i = self.f_index(e,'Editor')
+			e = e[i[0]].split(':')[1]
+			return e.strip()
+		if m == 'papuapos':
+			e = e[0].split()[-1]
+			return e
+		if m == 'radarsultengonline':
+			e = e[-1]
+			try:
+				e = e.split('.')[-1]
+			except IndexError:
+				pass
+			e = re.sub('[()]','',e)
+			return e.strip()
 		else:
 			# if not e:
 			# 	return '-'
@@ -218,27 +288,26 @@ class deteksi(object):
 				bulan = self.month_name(parse_date[1])
 				t = parse_date[0] + ' ' + bulan + ' ' + \
 					parse_date[2] + ' ' + parse_date[3]
-				return self.f_date(t)
 			except IndexError:
-				return self.d_now()
+				t = self.d_now()
+			return self.f_date(t)
 		if m == 'viva' or m == 'suara' or m == 'skalanews' or m == 'analisadaily':
 			try:
 				parse_date = d[0].replace('WIB', '').replace('| ', '').split(', ')[1].strip().split(' ')
 				bulan = self.month_name(parse_date[1])
 				t = parse_date[0] + ' ' + bulan + ' ' + \
 					parse_date[2] + ' ' + parse_date[3]
-				return self.f_date(t)
 			except IndexError:
-				return self.d_now()
-			
+				t = self.d_now()
+			return self.f_date(t)
 		if m == 'kontan':
 			parse_date = d[0].replace('WIB', '').replace('/ ', '').split(', ')[1].strip().split(' ')
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + \
 				parse_date[2] + ' ' + parse_date[3]
 			return self.f_date(t)
-		if m == 'tribunnews' or m == 's_tribunnews' or m == 'merdeka' or m == 'bloktuban' or m == 'p_tribunnews' or m == 'k_tribunnews'\
-			or m == 'mks_tribunnews' or m == 'mnd_tribunnews':
+		if m == 'tribunnews' or m == 'surabaya.tribunnews' or m == 'merdeka' or m == 'bloktuban' or m == 'palembang.tribunnews' or m == 'kupang.tribunnews'\
+			or m == 'makassar.tribunnews' or m == 'manado.tribunnews':
 			parse_date = d[0].split(', ')[1].split(' ')
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + \
@@ -290,9 +359,9 @@ class deteksi(object):
 				parse_date = d[3].replace(',','').replace('|','').replace('WIB','').split()
 				bulan = self.month_name(parse_date[2])
 				t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
-				return self.f_date(t)
 			except IndexError:
-				return self.d_now() # different position '.wp-caption-text' example : http://rmol.co/dpr/read/2017/10/26/312606/Semoga,-Implementasi-APBN-2018-Bukan-Sekadar-Pencitraan-
+				t = self.d_now() # different position '.wp-caption-text' example : http://rmol.co/dpr/read/2017/10/26/312606/Semoga,-Implementasi-APBN-2018-Bukan-Sekadar-Pencitraan-
+			return self.f_date(t)
 		if m == 'sindonews':
 			parse_date = d[0].replace(',','').replace('-','').replace('WIB','').split()
 			bulan = self.month_name(parse_date[2])
@@ -325,11 +394,11 @@ class deteksi(object):
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
 			return self.f_date(t)
-		if m == 'sinarharapan':
-			parse_date = d[0].split()
-			bulan = self.month_name(parse_date[1])
-			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
-			return self.f_date(t)
+		# if m == 'sinarharapan':
+		# 	parse_date = d[0].split()
+		# 	bulan = self.month_name(parse_date[1])
+		# 	t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
+		# 	return self.f_date(t)
 		if m == 'kricom': #fix
 			i = self.f_index(d,'WIB')
 			t = d[i[0]].split(',')[1].split()
@@ -346,23 +415,23 @@ class deteksi(object):
 			parse_date = d[0].split()
 			t = parse_date[1].replace(',','')+' '+parse_date[2].replace('.',':')
 			return self.f_date(t)
-		if m == 'fajar' or m == 'beritajateng':
+		if m == 'fajar' or m == 'beritajateng' or m == 'rakyatsultra' or m == 'radarsulbar' or m == 'ambonekspres':
 			parse_date = d[0]
 			t = parse_date.replace(',','').replace('@','')
 			return self.f_date(t)
-		if m == 'pikiran':
+		if m == 'pikiran-rakyat':
 			parse_date = d[0].replace(',','').replace('-','').split()
 			bulan = self.month_name(parse_date[1])
 			t = parse_date[0] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
 			return self.f_date(t)
 		if m == 'theconversation':
-			parse_date = d[0].replace(',','').replace('.',':').split()
-			bulan = self.month_name(parse_date[0])
-			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
 			try:
-				return self.f_date(t)
+				parse_date = d[0].replace(',','').replace('.',':').split()
+				bulan = self.month_name(parse_date[0])
+				t = parse_date[1] + ' ' + bulan + ' ' + parse_date[2] + ' ' + parse_date[3]
 			except IndexError:
-				return self.d_now()
+				t = self.d_now()
+			return self.f_date(t)
 		if m == 'jurnas':
 			t = d[0].split('|')[1].split(',')[1].replace('WIB','')
 			return self.f_date(t)
@@ -372,12 +441,16 @@ class deteksi(object):
 			t = t.replace('WIB','')
 			return self.f_date(t)
 		if m == 'rri':
-			t = d[1]
-			return t
-		if m == 'bbc':
-			t = d[0].split()
-			bulan = self.month_name(t[1])
-			t = t[0] + ' ' + bulan + ' ' + t[2]
+			t = ' '.join(d)
+			t = re.sub('\s+', ' ', t).split()
+			b = self.month_name(t[1])
+			t = t[0] + ' ' + b + ' ' + t[3] + ' ' + t[2]
+			return self.f_date(t)
+			# return t
+		# if m == 'bbc':
+		# 	t = d[0].split()
+		# 	bulan = self.month_name(t[1])
+		# 	t = t[0] + ' ' + bulan + ' ' + t[2]
 			# return t
 			return self.f_date(t)
 		if m == 'independen':
@@ -385,14 +458,14 @@ class deteksi(object):
 			bulan = self.month_name(t[1])
 			t = t[0] + ' ' + bulan + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'tirto':
+		if m == 'tirto' or m == 'bnpt':
 			try:
 				t = d[0].replace(',','').split()
 				bulan = self.month_name(t[1])
 				t = t[0] + ' ' + bulan + ' ' + t[2]
-				return self.f_date(t)
 			except IndexError:
-				return self.d_now()
+				t = self.d_now()
+			return self.f_date(t)
 		if m == 'fajaronline':
 			parse_date = d[1].replace(',','').replace('-','').split()
 			bulan = self.month_name(parse_date[1])
@@ -409,12 +482,12 @@ class deteksi(object):
 		if m == 'tribratanews':
 			t = d[0].replace('pm','')
 			return self.f_date(t)
-		if m == 'nu' or m == 'kt_prokal':
+		if m == 'nu' or m == 'kalteng.prokal' or m == 'malang-post' or m == 'kaltim.prokal' or m == 'papuapos' or m == 'utamanews':
 			t = d[0].split(',')[1].split()
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'berdikari':
+		if m == 'berdikarionline':
 			t = d[0].replace('|','').split()
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
@@ -427,7 +500,7 @@ class deteksi(object):
 		if m == 'covesia':
 			t = d[0].replace('WIB','').split(',')[1]
 			return self.f_date(t)
-		if m == 'kabarpas' or m == 'lensaindonesia':
+		if m == 'kabarpas' or m == 'lensaindonesia' or m == 'radarsultengonline':
 			t = d[0]
 			return self.f_date(t)
 		if m == 'kini':
@@ -445,7 +518,7 @@ class deteksi(object):
 			j = d[1].replace('WIB','').strip()
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + j
 			return self.f_date(t)
-		if m == 'jabarnews':
+		if m == 'jabarnews' or m == 'bimakini':
 			t = d[0].replace(',','').split()
 			b = self.month_name(t[0])
 			t = t = t[1] + ' ' + b + ' ' + t[2]
@@ -467,12 +540,12 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'josstoday':
+		if m == 'josstoday' or m == 'sinarharapan':
 			t = d[0].split()
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'riauonline':
+		if m == 'riauonline' or m == 'kbr':
 			t = d[0].split(',')[1].replace('WIB','').split()
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
@@ -484,19 +557,23 @@ class deteksi(object):
 			j = d[1].replace('WIB','')
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + j
 			return self.f_date(t)
-		if m == 'timesindonesia':
+		if m == 'timesindonesia' or m == 'nukita':
 			t = d[0].replace('-','').split(',')[1].split()
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'harianrakyatbengkulu' or m == 'equator':
+		if m == 'harianrakyatbengkulu' or m == 'equator' or m == 'harianpilar' or m == 'jalandamai' \
+			or m =='bbc' or m == 'damailahindonesiaku' or m == 'dutadamai' or m == 'lombokpost'or m == 'kahaba' or m == 'radarposo' :
 			try:
-				t = d[0].split()
-				b = self.month_name(t[1])
-				t = t = t[0] + ' ' + b + ' ' + t[2]
-				return self.f_date(t)
+				try:
+					t = d[0].split()
+					b = self.month_name(t[1])
+					t = t = t[0] + ' ' + b + ' ' + t[2]
+				except IndexError:
+					t = self.d_now()
 			except TypeError:
-				return self.d_now()
+				t = self.d_now()
+			return self.f_date(t)
 		if m == 'rakyatpos':
 			t = self.m_replacer(d[0],['th,',',','pm','am'],'')
 			return self.f_date(t)
@@ -511,7 +588,7 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'hargo':
+		if m == 'hargo' or m == 'kalsel.prokal' or m == 'siwalimanews':
 			t = d[0].split(',')[1].split()
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2]
@@ -528,6 +605,37 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
+		if m == 'batamnews':
+			t = d[1].replace(',','').split()
+			b = self.month_name(t[2])
+			t = t[1] + ' ' + b + ' ' + t[3] + ' ' + t[4]
+			return self.f_date(t)
+		if m == 'damai' or m == 'suarakarya':
+			t = self.d_now()
+			return self.f_date(t)
+		if m == 'gatra':
+			t = d[1].split(',')[1].split()
+			b = self.month_name(t[1])
+			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
+			return self.f_date(t)
+		if m == 'kumparan':
+			t = d[0].replace('-','').split()
+			b = self.month_name(t[1])
+			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
+			return self.f_date(t)
+		if  m == 'padek':
+			i = self.f_index(d,'Editor')
+			t = d[i[0]+1].split('-')[1]
+			t = t.split()
+			b = self.month_name(t[1])
+			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
+			return self.f_date(t)
+		if m == 'tabloidjubi':
+			t = d[0].split(',')[1].split()
+			b = self.month_name(t[1])
+			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[4]
+			return self.f_date(t)
+			# return t
 		else:
 			# if not d:
 			# 	return self.d_now()
@@ -557,4 +665,4 @@ class deteksi(object):
 	def s_undecode(self,s):
 		return unicodedata.normalize('NFKD', unicode(s)).encode('ascii','ignore')
 	def d_now(self):
-		return datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
+		return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
