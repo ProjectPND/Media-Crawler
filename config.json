@@ -1133,7 +1133,7 @@
         "body": "#main-content .content article#the-post .post-inner",
         "title": "h1 span",
         "author": ".entry p span",
-        "date": "article header span.post-date span.month",
+        "date": "p.post-meta span.tie-date",
         "content": ".entry p",
         "synopsis": ".entry p",
         "r_content": ["WOL "],
@@ -1680,9 +1680,9 @@
         "synopsis": ".td-post-content p",
         "lang": "id"
     },
-    "rakyatsultra":
+    "rakyatsultra.fajar":
     {
-        "media": "rakyatsultra.fajar.com",
+        "media": "rakyatsultra.fajar.co.id",
         "category": "berita",
         "index": ["http://rakyatsultra.fajar.co.id/?s="],
         "list": "ul.archive-col-list li.infinite-post",

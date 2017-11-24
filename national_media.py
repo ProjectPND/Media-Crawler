@@ -28,8 +28,8 @@ deteksi = deteksi()
 i_config = sys.argv[1]
 t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
 
-o_config = 'data/'+i_config+'__'+t_now+'.json'
-# o_config = 'data/'+i_config+'.json'
+# o_config = 'data/'+i_config+'__'+t_now+'.json'
+o_config = 'data/'+i_config+'.json'
 
 
 target = config[i_config]					

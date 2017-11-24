@@ -2,7 +2,7 @@ from dateutil import parser
 import unicodedata
 import re
 from scrapy import Request
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class deteksi(object):
@@ -39,7 +39,7 @@ class deteksi(object):
 		 	or m == 'tribratanews' or m == 'faktualnews' or m == 'lensaindonesia' or m == 'maduracorner' or m == 'riauonline'\
 		 	or m == 'harianrakyatbengkulu' or m == 'rakyatpos' or m == 'krjogja' or m == 'hargo' or m == 'suarakarya' \
 		 	or m == 'jalandamai' or m == 'damailahindonesiaku' or m == 'theconversation' or m == 'dutadamai' or m == 'lombokpost'\
-		 	or m == 'radarposo' or m == 'rakyatsultra' or m == 'radarsulbar' or m == 'ambonekspres' or m == 'utamanews':
+		 	or m == 'radarposo' or m == 'rakyatsultra.fajar' or m == 'radarsulbar' or m == 'ambonekspres' or m == 'utamanews':
 			try:
 				return e[0].strip()
 			except IndexError:
@@ -111,7 +111,7 @@ class deteksi(object):
 			return re.sub('[(\)]','',e)
 		if m == 'damai':
 			return e
-		if m == 'waspada' or m == 'antaranews':
+		if m == 'antaranews':
 			e = self.m_replacer(e[0],['Editor',':'],'')
 			return e.strip()
 		if m == 'palembang.tribunnews' or m == 'kupang.tribunnews' or m == 'makassar.tribunnews':
@@ -211,6 +211,19 @@ class deteksi(object):
 			except IndexError:
 				pass
 			e = re.sub('[()]','',e)
+			return e.strip()
+		if m == 'waspada':
+			try:
+				e = e[-1]
+			except IndexError:
+				e = "-"
+			if ":" in e:
+				e = e.split(":")[-1]
+			else:
+				if "(" in e and ")" in e:
+					e = re.sub('[()]','',e)
+				else:
+					pass
 			return e.strip()
 		else:
 			# if not e:
@@ -415,7 +428,7 @@ class deteksi(object):
 			parse_date = d[0].split()
 			t = parse_date[1].replace(',','')+' '+parse_date[2].replace('.',':')
 			return self.f_date(t)
-		if m == 'fajar' or m == 'beritajateng' or m == 'rakyatsultra' or m == 'radarsulbar' or m == 'ambonekspres':
+		if m == 'fajar' or m == 'beritajateng' or m == 'rakyatsultra.fajar' or m == 'radarsulbar' or m == 'ambonekspres':
 			parse_date = d[0]
 			t = parse_date.replace(',','').replace('@','')
 			return self.f_date(t)
@@ -635,7 +648,10 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[4]
 			return self.f_date(t)
-			# return t
+		if m == 'waspada':
+			t = d[0].split()
+			t = str(self.t_ago(t))
+			return self.f_date(t)
 		else:
 			# if not d:
 			# 	return self.d_now()
@@ -666,3 +682,17 @@ class deteksi(object):
 		return unicodedata.normalize('NFKD', unicode(s)).encode('ascii','ignore')
 	def d_now(self):
 		return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	# a is array [number, string about hours, days, or months]
+	def t_ago(self,a):
+		n = a[0]
+		s = a[1]
+		if s == 'min' or s == 'mins':
+			return datetime.now() - timedelta(minutes=int(n))
+		if s == 'hour' or s == 'hours':
+			return datetime.now() - timedelta(hours=int(n))
+		if s == 'day' or s == 'days':
+			return datetime.now() - timedelta(days=int(n))
+		if s == 'month' or s == 'months':
+			return datetime.now() - timedelta(month=int(n))
+		else :
+			return datetime.now()

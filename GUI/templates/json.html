@@ -1,0 +1,31 @@
+{% include "inc/header.html" %}
+<div ng-app="App">
+
+	<div ng-controller="Ctrl">
+	  {# <a href="#" editable-text="user.name">[[ user.name || "empty" ]]</a>
+	  <a href="#" editable-text="media.aktual.title">[[ media.aktual.title || "empty" ]]</a> #}
+		<table class="table table-bordered" >
+			<thead>
+			  <tr>
+			  	<th class="text-center">No.</th>
+			    <th>Code</th>
+			    <th>Media</th>
+			    <th>Index</th>
+			    <th>List</th>
+			    <th>Link</th>
+			    <th>Body</th>
+			  </tr>
+			</thead>
+			<tbody ng-repeat="(key, data) in media">
+				<tr>
+		    		<td class="text-center">[[ $index+1 ]]</td>
+					<td>
+						<p editable-text="key">[[ key ]]</p>
+					</td>
+			</tbody>
+		</table>
+
+	</div>
+
+</div>
+{% include "inc/footer.html" %}
