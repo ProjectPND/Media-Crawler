@@ -1,0 +1,47 @@
+{% include "inc/header.html" %}
+<div ng-app="App">
+
+	{# <div ng-controller="Ctrl">
+	  <a href="#" editable-text="user.name">[[ user.name || "empty" ]]</a>
+	</div> #}
+
+	<h2>Media Crawling</h2>
+	<p>Daftar media yang di crawling <small>read from config.json</small></p>            
+	<table class="table table-bordered" ng-controller="Ctrl">
+		<thead>
+		  <tr>
+		  	<th class="text-center">No.</th>
+		    <th>Code</th>
+		    <th>Media</th>
+		    <th>Index</th>
+		    <th>List</th>
+		    <th>Link</th>
+		    <th>Body</th>
+		  </tr>
+		</thead>
+		<tbody>
+		{% for k in data|sort() %}
+		    {# <h2>{{ k }}</h2> #}
+		    <tr>
+		    	<td class="text-center">{{ loop.index }}</td>
+			    <td>{{ k }}</td>
+			    <td>{{data[k].media}}</td>
+			    <td>
+			    	{% for i in data[k].index %}
+				    	<small><a href="{{ i }}" target="_blank">{{ i }}</a></small><br>
+					{% endfor %}
+			    </td>
+			    <td>{{data[k].list}}</td>
+			    <td>{{data[k].link}}</td>
+			    <td>{{data[k].body}}</td>
+			  </tr>
+		    {# <h3>{{ data[k].list }}</h3> #}
+		    {# {% for v in data[k].index %}
+		    	<small>{{ v }}</small>
+			{% endfor %} #}
+		{% endfor %}
+		</tbody>
+	</table>
+</div>
+</body>
+</html>

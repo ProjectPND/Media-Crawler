@@ -8,29 +8,48 @@ from urlparse import urlparse
 from w3lib.html import remove_tags, remove_tags_with_content
 from scrapy.crawler import CrawlerProcess  # For Testing config
 from deteksi import deteksi
+import sys
+from datetime import datetime
+# import os
+# import unicodedata
 
 with open('config.json', 'r') as f:
 	config = json.load(f)
 
-print "================= INDEX MEDIA ======================"
-print "Choose your media :"
-print config.keys()
-print "===================================================="
+# print "================= INDEX MEDIA ======================"
+# print "Choose your media :"
+# print config.keys()
+# print "===================================================="
+
+# i_config = raw_input("Choose Media: ")
 
 deteksi = deteksi()
 
-i_config = raw_input("Choose Media: ")
+i_config = sys.argv[1]
+t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
+
+# o_config = 'data/'+i_config+'__'+t_now+'.json'
+o_config = 'data/'+i_config+'.json'
+
 
 target = config[i_config]					
 open("log.txt","w").close()
-open("result.json","w").close()
+open(o_config,"w").close()
+
+try:
+	target["mobile"]
+	u_agent = 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
+except KeyError:
+	u_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'
 
 class MainMediaSpider(scrapy.Spider):
 	name = 'mainmediaspider'
+	handle_httpstatus_list = [404,503]
 
 	def log(self,t):
 		file = open('log.txt', 'a')
-		t = unicode(t)
+		# t = unicode(t)
+		t = deteksi.s_undecode(t)
 		file.write(t)
 		file.write('\n')
 		file.close()
@@ -41,7 +60,7 @@ class MainMediaSpider(scrapy.Spider):
 	def synopsis(self, s):
 		for x in s:
 			if len(x) > 50:
-			    return x.replace(' - ', '')
+			    return x#.replace(' - ', '')
 			    break
 			else:
 			    continue
@@ -65,7 +84,10 @@ class MainMediaSpider(scrapy.Spider):
 			method = "GET"
 
 		for url in urls:
-			self.log(url)
+			# self.log(url)
+			# request = scrapy.Request(url=url, method=method, callback=self.parse)
+			# request.meta['proxy'] = "187.188.168.51:52335"
+			# yield request
 			yield scrapy.Request(url=url, method=method, callback=self.parse)
 
 	def parse(self, response):
@@ -74,7 +96,7 @@ class MainMediaSpider(scrapy.Spider):
 			lists = response.xpath(xpath).css(target["list"])
 		except KeyError:
 			lists = response.css(target["list"])
-
+		# self.log(lists)
 
 		for article_list in lists:
 			nextUrl = article_list.css(target["link"]).extract_first()
@@ -96,87 +118,124 @@ class MainMediaSpider(scrapy.Spider):
 			body = response.css(target["body"])
 
 		tautan = None
+		# self.log(response.css(".container .news-read .article .chatNews #lifeSocial").extract())
+
 
 		for content in body:
 			if tautan != response.url:
 
 				tautan = response.url
 				parsed_uri = urlparse(tautan)
-				domain = parsed_uri[1]  # from config or url
-				kanal = parsed_uri[2].split('/')[1]  # from config or url
+				# domain = parsed_uri[1]  # from config or url
+				domain = target['media']  # from config or url
+				kanal = target["category"]  # from config or url
+				# kanal = parsed_uri[2].split('/')[1]  # from config or url
 
 				kode = self.id_hash(tautan)
 
-				# self.log(kode)
+				# self.log(content.css("article div.lf-ghost"))
 				judul = ''.join(content.css(target["title"]).css('::text').extract())
 				judul = re.sub(regex,'',judul).strip()
 
 				# JPNN not have author / editor
 				penulis = deteksi.c_editor(content.css(target["author"]).css('::text').extract(), i_config)
-
-				# isi = response.css(target["content"]).css('::text').extract()
-				# isi = response.css(target["content"]).extract() # raw HTML source
-				# isi = remove_tags_with_content(isi[0], ('script', ))
 				# ==================  START : Testing Remove Script from Content ===================== #
-				isi = content.css(target["content"]).extract()
-				isi = unicode(''.join(isi))
 
+				# if target["paging"] is not None:
+				# 	paging = target["paging"]
+				# 	p_URL = response.css(paging[0]).extract()[1:-1]
+				# 	isi = content.css(target["content"])
+				# 	for p in p_URL:
+				# 		# c = deteksi.p_content(p,target["content"])
+				# 		c = Request(response.urljoin(p),callback=deteksi.p_content, meta={'t_content':target["content"]})
+				# 		self.log(c.callback)
+				# else :
+				# 	isi = content.css(target["content"]).extract()
+
+				isi = content.css(target["content"]).extract()
+				# self.log(isi)
+				try:
+					for x in target["r_index"]:
+						i = deteksi.f_index(isi,x)
+						for li in i:
+							del isi[li]
+						# self.log(x)
+				except KeyError:
+					pass
+
+				# isi = unicode(''.join(isi))
+				# self.log(isi)
+				isi = deteksi.s_undecode(''.join(isi))
 				try:
 					for x in target["r_tag"]:
 						r_tag = content.css(x).extract()
+						# self.log(content.css(x))
 						for r in r_tag:
 							t = unicode(''.join(r))
+							# t = t.encode('ascii', 'ignore').decode('unicode_escape')
+							t = deteksi.s_undecode(''.join(r)).replace('(','\(').replace(')','\)').replace('/','\/').replace('+','\+')
+							# t = re.escape(t)
+							# t = re.sub(r'[()]')
+							# isi = re.escape(isi)
 							isi = re.sub(t,'',isi)
-					# self.log(isi)
+							# isi = deteksi.s_undecode(isi)
+							# isi = deteksi.s_undecode(re.escape(t))
+							# self.log(t)
+							# self.log(isi)
 				except KeyError:
 					pass
 				
-				isi = remove_tags_with_content(isi, ('script','style' ))
+				isi = remove_tags_with_content(isi, ('script','style'))
 				isi = Selector(text=isi).xpath('//text()').extract()
 				# ================== END : Testing Remove Script from Content ===================== #
 
-				sipnosis = self.synopsis(isi)  # get from content target
-				sipnosis = re.sub(regex,'',sipnosis).strip()
+				sinopsis = self.synopsis(isi)  # get from content target
+				try:
+					sinopsis = re.sub(regex,'',sinopsis).strip()
+				except TypeError:
+					pass
 				isi = ' '.join(isi).split()#.strip()
 				isi = ' '.join(isi)
 
 				try:
 					r_content = target["r_content"]
 					for x in r_content:
-						# reg = re.compile(r)
-						# isi = re.sub(r'Aktual.com-','',isi)
 						try:
-							sipnosis = re.sub(x,'',sipnosis)
+							sinopsis = re.sub(x,'',sinopsis)
 							isi = re.sub(x,'',isi)
 						except TypeError:
 							pass
-						# isi = isi.replace(x,'')
-						# self.log(isi)
 				except KeyError:
 					pass
 				isi = re.sub(regex,'',isi).strip()
-				# self.log(isi)
-
-				# isi = unicodedata.normalize('NFKD', unicode(isi))
-				# isi = regex.sub('') # For remove character from reg expression
-				# isi = re.sub(r"\s+", " ", isi, flags=re.UNICODE) # remove whitespaces to one space
 
 				tanggal = deteksi.c_date(content.css(target["date"]).css('::text').extract(), i_config)
 				# self.log(tanggal)
 
 				bahasa = target["lang"]
 
-				yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sipnosis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
+				# isi = content.css(target["content"]).extract()
 
+				if isi is not "" :
+					yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sinopsis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
+					# yield {'id': tes}
+				else:
+					self.log({'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sinopsis, 'media': domain, 'kanal': kanal, 'lang': bahasa})
 
 # For Testing config with different format
 
 process = CrawlerProcess({
-	'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
+	'USER_AGENT': u_agent,
+	# 'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
 	'FEED_FORMAT': 'json',
-	'FEED_URI': 'result.json',
-	'DOWNLOAD_DELAY' : 0.25
+	'FEED_URI': o_config,
+	'DOWNLOAD_DELAY' : 0.50,
 })
 
 process.crawl(MainMediaSpider)
 process.start()  # the script will block here until the crawling is finished
+
+# s_file = os.stat(o_config).st_size
+# if s_file == 0:
+# 	open(o_config,"rb").close()
+# 	os.remove(o_config)

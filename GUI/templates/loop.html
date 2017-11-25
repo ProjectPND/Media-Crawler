@@ -1,0 +1,8 @@
+<!-- {{ data['hargo'] }} -->
+{% for k in data %}
+    <h2>{{ k }}</h2>
+    <h3>{{ data[k].list }}</h3>
+    {% for v in data[k].index %}
+    	<small>{{ v }}</small>
+	{% endfor %}
+{% endfor %}
