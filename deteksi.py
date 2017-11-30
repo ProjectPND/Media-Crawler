@@ -4,6 +4,9 @@ import re
 from scrapy import Request
 from datetime import datetime, timedelta
 
+# from scrapy.http.request import Request
+# import scrapy
+
 
 class deteksi(object):
 
@@ -95,7 +98,7 @@ class deteksi(object):
 			return e[1].strip()
 		if m == 'kabarpas' or m == 'kini':
 			return e[0].split(':')[1].strip()
-		if m == 'beritajatim':
+		if m == 'beritajatim' or m == 'voaindonesia':
 			try:
 				e = re.sub('[[\]]','',e[1])
 			except IndexError:
@@ -158,13 +161,6 @@ class deteksi(object):
 			i = self.f_index(e,'Editor')
 			e = e[i[0]].split(':')[1]
 			return e.strip()
-		# if  m == 'kalsel.prokal':
-		# 	try:
-		# 		e = e[-1].split()[-1]
-		# 		e = re.sub('[()]','',e)
-		# 		return e
-		# 	except IndexError:
-		# 		return "-"
 		if  m == 'kbr':
 			try:
 				return e[1].strip()
@@ -225,6 +221,9 @@ class deteksi(object):
 				else:
 					pass
 			return e.strip()
+		if m == 'jpnn': #Content must be load by paging
+			# e = e[0].split(',')[1].split()
+			return e
 		else:
 			# if not e:
 			# 	return '-'
@@ -648,7 +647,7 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[4]
 			return self.f_date(t)
-		if m == 'waspada':
+		if m == 'waspada' or m == 'voaindonesia':
 			t = d[0].split()
 			t = str(self.t_ago(t))
 			return self.f_date(t)
@@ -686,13 +685,24 @@ class deteksi(object):
 	def t_ago(self,a):
 		n = a[0]
 		s = a[1]
-		if s == 'min' or s == 'mins':
+		if s == 'min' or s == 'mins' or s == 'menit':
 			return datetime.now() - timedelta(minutes=int(n))
-		if s == 'hour' or s == 'hours':
+		if s == 'hour' or s == 'hours' or s == 'jam':
 			return datetime.now() - timedelta(hours=int(n))
-		if s == 'day' or s == 'days':
+		if s == 'day' or s == 'days' or s == 'hari':
 			return datetime.now() - timedelta(days=int(n))
-		if s == 'month' or s == 'months':
+		if s == 'month' or s == 'months' or s == 'bulan':
 			return datetime.now() - timedelta(month=int(n))
 		else :
 			return datetime.now()
+
+	# def p_link(self,s,u,c):
+	# 	request = s.Request(url=u[0],callback = self.location)
+	# 	return request.response
+		# return u[0]
+	def p_link(self,r):
+		# r = Request(url=r)
+		item = r.meta['item']
+		item["content"] = "text"
+		return item
+

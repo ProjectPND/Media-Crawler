@@ -10,7 +10,10 @@ from scrapy.crawler import CrawlerProcess  # For Testing config
 from deteksi import deteksi
 import sys
 from datetime import datetime
-# import os
+import os
+
+from stem import Signal
+from stem.control import Controller
 # import unicodedata
 
 with open('config.json', 'r') as f:
@@ -36,15 +39,30 @@ target = config[i_config]
 open("log.txt","w").close()
 open(o_config,"w").close()
 
+# try:
+# 	proxy = target["proxy"]
+# 	os.environ["http_proxy"] = proxy
+# except KeyError:
+# 	pass
+
 try:
 	target["mobile"]
 	u_agent = 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
 except KeyError:
 	u_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'
 
+
+def _set_new_ip():
+    with Controller.from_port(port=9051) as controller:
+        # controller.authenticate(password='tor_password')
+        controller.signal(Signal.NEWNYM)
+
+class s_Item(scrapy.Item):
+    content = scrapy.Field()
+
 class MainMediaSpider(scrapy.Spider):
 	name = 'mainmediaspider'
-	handle_httpstatus_list = [404,503]
+	handle_httpstatus_list = [301,404,503]
 
 	def log(self,t):
 		file = open('log.txt', 'a')
@@ -85,10 +103,17 @@ class MainMediaSpider(scrapy.Spider):
 
 		for url in urls:
 			# self.log(url)
-			# request = scrapy.Request(url=url, method=method, callback=self.parse)
-			# request.meta['proxy'] = "187.188.168.51:52335"
-			# yield request
-			yield scrapy.Request(url=url, method=method, callback=self.parse)
+			request = scrapy.Request(url=url, method=method, callback=self.parse)
+			# try:
+			# 	# _set_new_ip()
+			# 	# request.meta['proxy'] = 'http://127.0.0.1:9051'
+			# 	# proxy = target["proxy"]
+			# 	# request.meta['proxy'] = proxy
+			# except KeyError:
+			# 	pass
+
+			# self.log(request.meta['proxy'])
+			yield request
 
 	def parse(self, response):
 		try:
@@ -101,13 +126,23 @@ class MainMediaSpider(scrapy.Spider):
 		for article_list in lists:
 			nextUrl = article_list.css(target["link"]).extract_first()
 			if nextUrl is not None:
-				yield response.follow(nextUrl, self.parseDetail)
+			# 	request = scrapy.Request(url=nextUrl, callback=self.parseDetail)
+			# 	# yield response.follow(nextUrl, self.parseDetail)
 				# self.log(nextUrl)
-			else:
-				pass
+			# 	try:
+			# 		proxy = target["proxy"]
+			# 		request.meta['proxy'] = proxy
+			# 	except KeyError:
+			# 		pass
+
+				# yield request
+				yield response.follow(nextUrl, self.parseDetail)
+
+			# else:
+			# 	pass
 
 	def parseDetail(self, response):
-		# self.log(response)
+		# self.log(response.status)
 
 		regex = re.compile(r'[\n\r\t]')
 
@@ -152,6 +187,27 @@ class MainMediaSpider(scrapy.Spider):
 				# else :
 				# 	isi = content.css(target["content"]).extract()
 
+				try:
+					page = target["paging"]
+					page = response.css('.pagination a::attr("href")').extract()
+					try:
+						del page[-1]
+						# item = response.meta['item']
+						item = s_Item()
+						request = scrapy.Request(url=page[0],callback=deteksi.p_link)
+						# request = deteksi.p_link(page[0])
+						request.meta['item'] = item
+						yield request
+						
+						self.log(item)
+						self.log(request.meta['item'])
+					except IndexError:
+						pass
+					# page = deteksi.p_link(scrapy,page,target["content"])
+				except KeyError:
+					pass
+
+
 				isi = content.css(target["content"]).extract()
 				# self.log(isi)
 				try:
@@ -186,14 +242,26 @@ class MainMediaSpider(scrapy.Spider):
 					pass
 				
 				isi = remove_tags_with_content(isi, ('script','style'))
-				isi = Selector(text=isi).xpath('//text()').extract()
+				
+				# isi = Selector(text=isi).xpath('//text()').extract()
+				# self.log(isi)
 				# ================== END : Testing Remove Script from Content ===================== #
 
-				sinopsis = self.synopsis(isi)  # get from content target
+				try:
+					i_synopsis = target["synopsis"]
+					sinopsis = Selector(text=isi).css(target['synopsis']).extract_first()
+					sinopsis = Selector(text=sinopsis).xpath('//text()').extract()
+					sinopsis = ' '.join(sinopsis)
+					isi = Selector(text=isi).xpath('//text()').extract()
+				except KeyError:
+					isi = Selector(text=isi).xpath('//text()').extract()
+					sinopsis = self.synopsis(isi)  # get from content target
+				
 				try:
 					sinopsis = re.sub(regex,'',sinopsis).strip()
 				except TypeError:
 					pass
+
 				isi = ' '.join(isi).split()#.strip()
 				isi = ' '.join(isi)
 
@@ -207,14 +275,13 @@ class MainMediaSpider(scrapy.Spider):
 							pass
 				except KeyError:
 					pass
+
 				isi = re.sub(regex,'',isi).strip()
 
 				tanggal = deteksi.c_date(content.css(target["date"]).css('::text').extract(), i_config)
 				# self.log(tanggal)
 
 				bahasa = target["lang"]
-
-				# isi = content.css(target["content"]).extract()
 
 				if isi is not "" :
 					yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sinopsis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
@@ -229,7 +296,8 @@ process = CrawlerProcess({
 	# 'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
 	'FEED_FORMAT': 'json',
 	'FEED_URI': o_config,
-	'DOWNLOAD_DELAY' : 0.50,
+	'DOWNLOAD_DELAY' : 1.0,
+	'AUTOTHROTTLE_ENABLED' : True
 })
 
 process.crawl(MainMediaSpider)
