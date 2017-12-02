@@ -32,9 +32,13 @@ t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':
 o_config = 'data/'+i_config+'.json'
 
 
-target = config[i_config]					
-open("log.txt","w").close()
-open(o_config,"w").close()
+target = config[i_config]
+try:		
+	open("log.txt","w").close()
+	open(o_config,"w").close()
+except IOError:
+	pass				
+
 
 try:
 	target["mobile"]
@@ -45,6 +49,10 @@ except KeyError:
 class MainMediaSpider(scrapy.Spider):
 	name = 'mainmediaspider'
 	handle_httpstatus_list = [404,503]
+	ITEM_PIPELINES = {
+	    'MainMediaSpider.pipelines.PricePipeline': 300,
+	    'MainMediaSpider.pipelines.JsonWriterPipeline': 800,
+	}
 
 	def log(self,t):
 		file = open('log.txt', 'a')
@@ -230,6 +238,7 @@ process = CrawlerProcess({
 	'FEED_FORMAT': 'json',
 	'FEED_URI': o_config,
 	'DOWNLOAD_DELAY' : 0.50,
+
 })
 
 process.crawl(MainMediaSpider)
