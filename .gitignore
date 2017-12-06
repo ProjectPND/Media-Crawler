@@ -3,3 +3,5 @@ GUI/ENV
 GUI/static/angular*
 GUI/static/bootstrap
 GUI/static/jquery
+log.txt
+data/
