@@ -42,7 +42,8 @@ class deteksi(object):
 		 	or m == 'tribratanews' or m == 'faktualnews' or m == 'lensaindonesia' or m == 'maduracorner' or m == 'riauonline'\
 		 	or m == 'harianrakyatbengkulu' or m == 'rakyatpos' or m == 'krjogja' or m == 'hargo' or m == 'suarakarya' \
 		 	or m == 'jalandamai' or m == 'damailahindonesiaku' or m == 'theconversation' or m == 'dutadamai' or m == 'lombokpost'\
-		 	or m == 'radarposo' or m == 'rakyatsultra.fajar' or m == 'radarsulbar' or m == 'ambonekspres' or m == 'utamanews':
+		 	or m == 'radarposo' or m == 'rakyatsultra.fajar' or m == 'radarsulbar' or m == 'ambonekspres' or m == 'utamanews' \
+		 	or m == 'australiaplus' or m == 'bareksa' or m == 'dailysocial' or m == 'goal' or m == 'hipwee' or m == 'hukumonline' or m == 'news.idntimes':
 			try:
 				return e[0].strip()
 			except IndexError:
@@ -62,7 +63,7 @@ class deteksi(object):
 				return e[0].split(':')[1].replace('\t','').strip()
 			except IndexError:
 				return '-'
-		if m == 'indopos' or m == 'batamtoday' or m == 'bloktuban' or m == 'gatra':
+		if m == 'indopos' or m == 'batamtoday' or m == 'bloktuban' or m == 'gatra' or m == 'hidayatullah':
 			try:
 				return e[0].split(':')[1].strip()
 			except IndexError:
@@ -87,12 +88,12 @@ class deteksi(object):
 			return e[0].split('Editor')[1].strip()
 		if m == 'okezone':
 			return e[0].replace(',','').strip()
-		if m == 'fajaronline':
+		if m == 'fajaronline' or m == 'republika':
 			return e[-1].split(':')[-1].strip()
 		if m == 'nu':
 			e = e[1].replace('Red:','')
 			return re.sub('[()]','',e)
-		if m == 'berdikari' or m == 'kahaba':
+		if m == 'berdikari' or m == 'kahaba' or m == 'ahad':
 			return e[-1].strip()
 		if m == 'covesia':
 			return e[1].strip()
@@ -115,7 +116,10 @@ class deteksi(object):
 		if m == 'damai':
 			return e
 		if m == 'antaranews':
-			e = self.m_replacer(e[0],['Editor',':'],'')
+			try:
+				e = self.m_replacer(e[0],['Editor',':'],'')
+			except IndexError:
+				e = "-"
 			return e.strip()
 		if m == 'palembang.tribunnews' or m == 'kupang.tribunnews' or m == 'makassar.tribunnews':
 			try:
@@ -222,8 +226,16 @@ class deteksi(object):
 					pass
 			return e.strip()
 		if m == 'jpnn': #Content must be load by paging
-			# e = e[0].split(',')[1].split()
-			return e
+			# for x in reversed(e):
+				# if ")" in x:
+				# if "(" in x and ")" in x:
+					# e = x
+					# break
+			# e = e.split()[-1]
+			# e = re.sub('[()]','',e)
+			return "-"
+		if m == 'dw' or m == 'elshinta': 
+			return "-"
 		else:
 			# if not e:
 			# 	return '-'
@@ -276,7 +288,7 @@ class deteksi(object):
 			return "oct"
 		if m == "november" or m == "nov" or m == 'nopember':
 			return "nov"
-		if m == "desember" or m == "dec":
+		if m == "desember" or m == "dec" or m == "des":
 			return "dec"
 	# d is date, m is media
 	def c_date(self, d, m):
@@ -291,9 +303,13 @@ class deteksi(object):
 				t = d.replace('WIB','')
 			return self.f_date(t)
 		if m == 'kompas':
-			# t = d[0].split('-')[1].replace(',','').replace('WIB','')
-			t = self.m_replacer(d[0].split('-')[1], [',','WIB'],'')
+			try:
+				t = self.m_replacer(d[0].split('-')[1], [',','WIB'],'')
+				return self.f_date(t)
+			except IndexError:
+				t = self.d_now()
 			return self.f_date(t)
+
 		if m == 'dream':
 			try:
 				parse_date = d[2].split(', ')[1].split(' ')
@@ -374,7 +390,7 @@ class deteksi(object):
 			except IndexError:
 				t = self.d_now() # different position '.wp-caption-text' example : http://rmol.co/dpr/read/2017/10/26/312606/Semoga,-Implementasi-APBN-2018-Bukan-Sekadar-Pencitraan-
 			return self.f_date(t)
-		if m == 'sindonews':
+		if m == 'sindonews' or m == 'hidayatullah':
 			parse_date = d[0].replace(',','').replace('-','').replace('WIB','').split()
 			bulan = self.month_name(parse_date[2])
 			t = parse_date[1] + ' ' + bulan + ' ' + parse_date[3] + ' ' + parse_date[4]
@@ -494,7 +510,8 @@ class deteksi(object):
 		if m == 'tribratanews':
 			t = d[0].replace('pm','')
 			return self.f_date(t)
-		if m == 'nu' or m == 'kalteng.prokal' or m == 'malang-post' or m == 'kaltim.prokal' or m == 'papuapos' or m == 'utamanews':
+		if m == 'nu' or m == 'kalteng.prokal' or m == 'malang-post' or m == 'kaltim.prokal' or m == 'papuapos' or m == 'bareksa' \
+			or m == 'elshinta' or m == 'utamanews':
 			t = d[0].split(',')[1].split()
 			b = self.month_name(t[1])
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
@@ -531,9 +548,12 @@ class deteksi(object):
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + j
 			return self.f_date(t)
 		if m == 'jabarnews' or m == 'bimakini':
-			t = d[0].replace(',','').split()
-			b = self.month_name(t[0])
-			t = t = t[1] + ' ' + b + ' ' + t[2]
+			try:
+				t = d[0].replace(',','').split()
+				b = self.month_name(t[0])
+				t = t = t[1] + ' ' + b + ' ' + t[2]
+			except TypeError:
+				t = self.d_now()
 			return self.f_date(t)
 		if m == 'lampungpro':
 			t = d[2].split(',')
@@ -575,7 +595,8 @@ class deteksi(object):
 			t = t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
 		if m == 'harianrakyatbengkulu' or m == 'equator' or m == 'harianpilar' or m == 'jalandamai' \
-			or m =='bbc' or m == 'damailahindonesiaku' or m == 'dutadamai' or m == 'lombokpost'or m == 'kahaba' or m == 'radarposo' :
+			or m =='bbc' or m == 'damailahindonesiaku' or m == 'dutadamai' or m == 'lombokpost'or m == 'kahaba' or m == 'radarposo' \
+			or m == 'ahad' or m == 'news.idntimes' :
 			try:
 				try:
 					t = d[0].split()
@@ -600,7 +621,7 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[3]
 			return self.f_date(t)
-		if m == 'hargo' or m == 'kalsel.prokal' or m == 'siwalimanews':
+		if m == 'hargo' or m == 'kalsel.prokal' or m == 'siwalimanews' or m == 'hukumonline':
 			t = d[0].split(',')[1].split()
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2]
@@ -647,10 +668,31 @@ class deteksi(object):
 			b = self.month_name(t[1])
 			t = t[0] + ' ' + b + ' ' + t[2] + ' ' + t[4]
 			return self.f_date(t)
-		if m == 'waspada' or m == 'voaindonesia':
+		if m == 'waspada' or m == 'voaindonesia' or m == 'hipwee':
 			t = d[0].split()
 			t = str(self.t_ago(t))
 			return self.f_date(t)
+		if m == 'australiaplus':
+			t = d[2].split()
+			if 'ago' in t:
+				# t = d[0].split()
+				t = str(self.t_ago(t))
+			else:
+				b = self.month_name(t[1])
+				t = t[0] + ' ' + b + ' ' + t[2]
+			return self.f_date(t)
+		if m == 'dailysocial' or m == 'dw':
+			t = d[-1].strip()
+			return self.f_date(t)
+		if m == 'goal':
+			t = d[0]
+			if ":" in t :
+				t = str(datetime.now())
+				t = t.split()
+				t[-1] = d[0].strip()
+				t = ' '.join(t)
+			return self.f_date(t)
+			# return t
 		else:
 			# if not d:
 			# 	return self.d_now()
@@ -696,13 +738,25 @@ class deteksi(object):
 		else :
 			return datetime.now()
 
-	# def p_link(self,s,u,c):
-	# 	request = s.Request(url=u[0],callback = self.location)
-	# 	return request.response
-		# return u[0]
-	def p_link(self,r):
-		# r = Request(url=r)
-		item = r.meta['item']
-		item["content"] = "text"
-		return item
+	def r_index(self,a,k):
+		try:
+			i = self.f_index(a,k)[0]
+			del a[i]
+		except IndexError:
+			pass
+		return a
+
+	def temp(self,f,t):
+		file = open('temp/'+f+'.txt', 'a')
+		t = self.s_undecode(t)
+		file.write(t)
+		file.close()
+		
+	# delete file
+	# def e_temp(self):
+	# 	return open("temp.txt","w").close()
+
+	def p_content(self,response,c,f):
+		r = response.css(c).extract()
+		return self.temp(f,r)
 
