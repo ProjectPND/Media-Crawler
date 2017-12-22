@@ -4,6 +4,7 @@ from six.moves.urllib.parse import urljoin
 import scrapy
 from scrapy.selector import Selector
 from scrapy.utils.python import to_native_str
+from scrapy_splash import SplashRequest
 import re
 import hashlib
 import json
@@ -59,7 +60,7 @@ except IOError:
 if not os.path.isdir('data'):
 	os.system('mkdir data')
 if not os.path.isdir('temp'):
-    os.system('mkdir temp')
+	os.system('mkdir temp')
 
 # try:
 # 	proxy = target["proxy"]
@@ -75,9 +76,9 @@ except KeyError:
 
 
 def _set_new_ip():
-    with Controller.from_port(port=9051) as controller:
-        # controller.authenticate(password='tor_password')
-        controller.signal(Signal.NEWNYM)
+	with Controller.from_port(port=9051) as controller:
+		# controller.authenticate(password='tor_password')
+		controller.signal(Signal.NEWNYM)
 
 # class s_Item(scrapy.Item):
 #     content = scrapy.Field()
@@ -100,10 +101,10 @@ class MainMediaSpider(scrapy.Spider):
 	def synopsis(self, s):
 		for x in s:
 			if len(x) > 50:
-			    return x#.replace(' - ', '')
-			    break
+				return x#.replace(' - ', '')
+				break
 			else:
-			    continue
+				continue
 			break
 
 # ================= END ======================== #
@@ -125,52 +126,71 @@ class MainMediaSpider(scrapy.Spider):
 
 		for url in urls:
 			# self.log(url)
-			request = scrapy.Request(url=url, method=method, callback=self.parse)
+			try:
+				target["js"]
+				request = SplashRequest(url, self.parse,
+				endpoint='render.html',
+				args={'wait': 0.5},
+				)
+			except KeyError:
+				request = scrapy.Request(url=url, method=method, callback=self.parse)
+			
 			try:
 			# 	# _set_new_ip()
 			# 	# request.meta['proxy'] = 'http://127.0.0.1:9051'
-			 	proxy = target["proxy"]
+				proxy = target["proxy"]
 				request.meta['proxy'] = proxy
 			except KeyError:
-			 	pass
+				pass
 
-			# self.log(request.meta['proxy'])
 			yield request
 
 	def parse(self, response):
 		# handle redirection
-        # this is copied/adapted from RedirectMiddleware
+		# this is copied/adapted from RedirectMiddleware
 		if response.status >= 300 and response.status < 400:
-		    # HTTP header is ascii or latin1, redirected url will be percent-encoded utf-8
-		    location = to_native_str(response.headers['location'].decode('latin1'))
+			# HTTP header is ascii or latin1, redirected url will be percent-encoded utf-8
+			location = to_native_str(response.headers['location'].decode('latin1'))
 
-		    # get the original request
-		    request = response.request
-		    # and the URL we got redirected to
-		    redirected_url = urljoin(request.url, location)
+			# get the original request
+			request = response.request
+			# and the URL we got redirected to
+			redirected_url = urljoin(request.url, location)
 
-		    if response.status in (301, 307) or request.method == 'HEAD':
-		        redirected = request.replace(url=redirected_url)
-		        yield redirected
-		    else:
-		        redirected = request.replace(url=redirected_url, method='GET', body='')
-		        redirected.headers.pop('Content-Type', None)
-		        redirected.headers.pop('Content-Length', None)
-		        yield redirected
-		    # ========================================== Function for Testing error 301 ============================================ #
+			if response.status in (301, 307) or request.method == 'HEAD':
+				redirected = request.replace(url=redirected_url)
+				yield redirected
+			else:
+				redirected = request.replace(url=redirected_url, method='GET', body='')
+				redirected.headers.pop('Content-Type', None)
+				redirected.headers.pop('Content-Length', None)
+				yield redirected
+			# ========================================== Function for Testing error 301 ============================================ #
 
 		try:
 			xpath = target["xpath_list"]
 			lists = response.xpath(xpath).css(target["list"])
 		except KeyError:
 			lists = response.css(target["list"])
-		# self.log(lists)
+		# self.log(response.css('ul.items_lists li.item a::attr("href")').extract())
+		# self.log(response.css('.content-column'))
+		self.log(lists)
 
 		for article_list in lists:
 			nextUrl = article_list.css(target["link"]).extract_first()
+			# self.log(nextUrl)
 			if nextUrl is not None:
-				yield response.follow(nextUrl, self.parseDetail)
-				# yield scrapy.Request(url=nextUrl, callback=self.parseDetail)
+				try:
+					target["js"]
+					request = SplashRequest(nextUrl, self.parseDetail,
+					endpoint='render.html',
+					args={'wait': 0.5},
+					)
+				except KeyError:
+					# request = scrapy.Request(url=url, method=method, callback=self.parse)
+					request =  response.follow(nextUrl, self.parseDetail)
+					# yield scrapy.Request(url=nextUrl, callback=self.parseDetail)
+				yield request
 
 
 	def parsePaging(self,response):
@@ -181,27 +201,29 @@ class MainMediaSpider(scrapy.Spider):
 
 	def parseDetail(self, response):
 
+		# self.log(response.css('#content .wrapper h1.select-headline').extract())
+
 		# handle redirection
-        # this is copied/adapted from RedirectMiddleware
+		# this is copied/adapted from RedirectMiddleware
 		if response.status >= 300 and response.status < 400:
 
-		    # HTTP header is ascii or latin1, redirected url will be percent-encoded utf-8
-		    location = to_native_str(response.headers['location'].decode('latin1'))
+			# HTTP header is ascii or latin1, redirected url will be percent-encoded utf-8
+			location = to_native_str(response.headers['location'].decode('latin1'))
 
-		    # get the original request
-		    request = response.request
-		    # and the URL we got redirected to
-		    redirected_url = urljoin(request.url, location)
+			# get the original request
+			request = response.request
+			# and the URL we got redirected to
+			redirected_url = urljoin(request.url, location)
 
-		    if response.status in (301, 307) or request.method == 'HEAD':
-		        redirected = request.replace(url=redirected_url)
-		        yield redirected
-		    else:
-		        redirected = request.replace(url=redirected_url, method='GET', body='')
-		        redirected.headers.pop('Content-Type', None)
-		        redirected.headers.pop('Content-Length', None)
-		        yield redirected
-		    # ========================================== Function for Testing error 301 ============================================ #
+			if response.status in (301, 307) or request.method == 'HEAD':
+				redirected = request.replace(url=redirected_url)
+				yield redirected
+			else:
+				redirected = request.replace(url=redirected_url, method='GET', body='')
+				redirected.headers.pop('Content-Type', None)
+				redirected.headers.pop('Content-Length', None)
+				yield redirected
+			# ========================================== Function for Testing error 301 ============================================ #
 
 		regex = re.compile(r'[\n\r\t]')
 
@@ -211,10 +233,13 @@ class MainMediaSpider(scrapy.Spider):
 		except KeyError:
 			body = response.css(target["body"])
 
+
 		tautan = None
 
+		# self.log(body.css('::text').extract())
 
 		for content in body:
+			# self.log(body.css('::text').extract())
 			if tautan != response.url:
 
 				tautan = response.url
@@ -231,7 +256,10 @@ class MainMediaSpider(scrapy.Spider):
 					pass
 
 				judul = ''.join(content.css(target["title"]).css('::text').extract())
+				# self.log(judul)
 				judul = re.sub(regex,'',judul).strip()
+
+
 
 				# JPNN not have author / editor
 				penulis = deteksi.c_editor(content.css(target["author"]).css('::text').extract(), i_config)
@@ -289,6 +317,7 @@ class MainMediaSpider(scrapy.Spider):
 					pass
 				
 				isi = remove_tags_with_content(isi, ('script','style'))
+				# self.log(isi)
 				
 				# ================== END : Testing Remove Script from Content ===================== #
 
@@ -339,7 +368,18 @@ process = CrawlerProcess({
 	'FEED_FORMAT': 'json',
 	'FEED_URI': o_config,
 	'DOWNLOAD_DELAY' : 1.0,
-	'AUTOTHROTTLE_ENABLED' : True
+	'AUTOTHROTTLE_ENABLED' : True,
+	'SPLASH_URL' : 'http://localhost:8050',
+	'DOWNLOADER_MIDDLEWARES' : {
+		'scrapy_splash.SplashCookiesMiddleware': 723,
+		'scrapy_splash.SplashMiddleware': 725,
+		'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+	},
+	'SPIDER_MIDDLEWARES' : {
+		'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+	},
+	'DUPEFILTER_CLASS' : 'scrapy_splash.SplashAwareDupeFilter',
+	'HTTPCACHE_STORAGE' : 'scrapy_splash.SplashAwareFSCacheStorage'
 })
 
 process.crawl(MainMediaSpider)
