@@ -237,7 +237,7 @@
         "author": "div.titlex div.newsDate p",
         "date": "div.titlex div.newsDate p",
         "content": "div.newsContent",
-        "r_content": ["RMOL. ","RMOL . "],
+        "r_content": ["RMOL. "],
         "lang": "id"
     },
     "beritasatu":
@@ -393,7 +393,7 @@
     {
         "media": "mediaindonesia.com",
         "category": "berita",
-        "index": ["http://www.mediaindonesia.com/news"],
+        "index": ["http://www.mediaindonesia.com/search?search="],
         "list": "div.m-latest div.items div.item",
         "link": "a.text::attr('href')",
         "body": ".m-article-single",
@@ -483,13 +483,13 @@
         "media": "teropongsenayan.com",
         "category": "berita",
         "index": ["http://www.teropongsenayan.com/indeks-berita"],
-        "list": "#item_list .media",
-        "link": "a::attr('href')",
-        "body": "body",
-        "title": ".detailberita-title",
-        "author": ".detailberita-writer span.bold-themes",
-        "date": ".detailberita-writer span.bold-themes",
-        "content": ".detailberita-isiberita p",
+        "list": "div.col-lg-9 div.col-lg-12 div.row div.col-lg-12",
+        "link": "ul.media-list li.media div.media-body div.tsupdate-title a::attr('href')",
+        "body": ".container div.row:nth-child(1) .col-lg-9",
+        "title": "div.wrapbox div.detailberita-title",
+        "author": "div.wrapbox div.detailberita-writer span:nth-child(1)",
+        "date": "div.wrapbox div.detailberita-writer span:nth-child(3)",
+        "content": "div.detailberita-isiberita p",
         "r_content": ["[(]TEROPONGSENAYAN[)]--","[(]TEROPONGSENAYAN[)] -- ","[(]TEROPONGSENAYAN[)] - ","[(]TEROPONGSENAYAN[)] - "],
         "lang": "id"
     },
@@ -796,11 +796,11 @@
         "index": ["https://www.rappler.com/indonesia/berita/nasional"],
         "list": "#page .wrapper.main-wrapper .item.wrapper.module-area",
         "link": "h4 a.rappler-headline.link::attr('href')",
-        "body": "#content",
+        "body": "#content #infinite-container .infinite-item .wrapper .story-area",
         "title": "h1.select-headline",
-        "author": "h6.byline a.rappler-headline",
-        "date": ".published",
-        "content": ".storypage-divider p",
+        "author": ".flex-reverse.wrapper .flex-child .flex-reverse.byline-container .flex-child h6 a.rappler-headline.link",
+        "date": ".flex-reverse.wrapper .flex-child .published",
+        "content": "p span",
         "lang": "id"
     },
     "beritagar":
@@ -887,7 +887,7 @@
         "body": "#td-outer-wrap article",
         "title": ".td-post-header header h1.entry-title",
         "author": ".td-post-content p:nth-child(2)",
-        "date": ".td-post-header header time.entry-date",
+        "date": ".td-post-header header time.entry-date.updated",
         "content": ".td-post-content p",
         "r_content": ["Kabarpas.com  ","Kabarpas.com ","[(]Kabarpas.com[)] "],
         "r_index": ["Reporter :","Editor :","________________________________"],
@@ -927,14 +927,13 @@
         "media": "jabarnews.com",
         "category": "berita",
         "index": ["http://www.jabarnews.com/?s="],
-        "list": "ul.items_lists li.item",
-        "link": "a::attr('href')",
-        "body": ".post-content .post",
-        "title": ".post-head h1.post-title",
-        "author": ".user-info .info a.name",
-        "date": ".user-info .info .detail time[itemprop='datePublished']",
-        "content": "article.post-body p",
-        "synopsis": "p:nth-child(3)",
+        "list": ".full-main-content ul li.post",
+        "link": "h2 a::attr('href')",
+        "body": ".main-container .site-content article",
+        "title": "header h1.entry-title",
+        "author": "p",
+        "date": "header .entry-post-meta time.entry-date.updated",
+        "content": "p",
         "r_content": ["JABAR NEWS [|]","[(][*][)] Jabar News [|] Berita Jawa Barat comments","Jabar News [|] Berita Jawa Barat comments","JABARNEWS [|] "],
         "lang": "id"
     },
@@ -1109,7 +1108,7 @@
     {
         "media": "harianrakyatbengkulu.com",
         "category": "berita",
-        "index": ["http://harianrakyatbengkulu.com/ver3/?s="],
+        "index": ["http://harianrakyatbengkulu.com/ver3/?s=Search"],
         "list": "#main-content div.content div.post-listing article.item-list",
         "link": "h2 a::attr('href')",
         "body": "#main-content .content article#the-post .post-inner",
@@ -1355,7 +1354,7 @@
         "category": "berita",
         "index": ["https://m.kumparan.com/topic/news/terkini","https://m.kumparan.com/topic/politik/terkini"],
         "list": ".list-group .list-group-item",
-        "link": "::attr('to')",
+        "link": "a::attr('href')",
         "body": "#content #detail-story .panel.panel-detail .card",
         "title": ".panel-body h1.main-title",
         "author": ".editor-credit",
@@ -1467,18 +1466,16 @@
     },
     "padek":
     {
-        "js": true,
-        "media": "padek.com",
+        "media": "padek.co",
         "category": "berita",
-        "index": ["https://newspadek.com/"],
-        "list": "#general-container .latest .article__list",
-        "link": "h3 a::attr('href')",
-        "body": "#general-container",
-        "title": "h1.headline__big__title",
-        "author": "div small[style='font-size:14px !important;']",
-        "date": "div small[style='font-size:14px !important;']",
-        "content": "div:nth-child(2) .col-bs10-7 div[style=\"font-size:20px !important; padding-left:10px; padding-right:10px; padding-top:25px;\"]",
-        "r_tag": [".social__item","small"],
+        "index": ["https://news.padek.co/"],
+        "list": ".content #konten #tab1 #kolom .kolom ul li",
+        "link": "a::attr('href')",
+        "body": ".main .container",
+        "title": "#title h1",
+        "author": "#title small",
+        "date": "#title small",
+        "content": "#desc p",
         "lang": "id"
     },
     "malang-post":
@@ -1561,13 +1558,13 @@
         "media": "radarsultengonline.com",
         "category": "berita",
         "index": ["http://radarsultengonline.com"],
-        "list": "#loops-wrapper article",
-        "link": "a::attr('href')",
-        "body": ".post-content",
-        "title": "h1.post-title",
-        "author": ".entry-content p",
-        "date": "time.post-date",
-        "content": ".entry-content p",
+        "list": "#main-content .content-wrap .post-listing article.item-list",
+        "link": "h2 a::attr('href')",
+        "body": "#main-content .content-wrap article#the-post",
+        "title": "h1.post-title.entry-title span",
+        "author": ".entry p",
+        "date": "p.post-meta span.tie-date",
+        "content": ".entry p",
         "r_tag": ["p.wp-caption-text"],
         "lang": "id"
     },
@@ -1658,600 +1655,6 @@
         "content": ".itemBody p",
         "r_content": ["\\[PAPOS\\] -","\\[PAPOS\\]- ","\\[PAPOS\\]-"],
         "lang": "id"
-    },
-    "ahad":
-    {
-        "media": "ahad.co.id",
-        "category": "berita",
-        "index": ["http://ahad.co.id/?s="],
-        "list": ".td-container .td-main-content .item-details ",
-        "link": "h3 a::attr('href')",
-        "body": ".td-container .td-main-content article",
-        "title": ".td-post-header header h1.entry-title",
-        "author": ".td-post-content p",
-        "date": ".td-post-header header span time.entry-date",
-        "content": ".td-post-content p",
-        "lang": "id"
-    },
-    "australiaplus":
-    {
-        "media": "australiaplus.com",
-        "category": "berita",
-        "index": ["http://www.australiaplus.com/indonesian/berita/"],
-        "list": "#main-content .category-index section .content-container .view-richWideGrid",
-        "link": "a.richWide-link::attr('href')",
-        "body": "#main-content article.article-detail-page",
-        "title": "header .details h1",
-        "author": ".details .view-infosourcebyline .comp-rich-text p",
-        "date": ".details .view-teaser-time-information .view-comp-publish-date",
-        "content": ".container .article-text p",
-        "lang": "id"
-    },
-    "akarpadinews":
-    {
-        "media": "akarpadinews.com",
-        "category": "berita",
-        "index": ["http://akarpadinews.com/read"],
-        "list": ".contentwrap .wlist .listi",
-        "link": ".ncs a::attr('href')",
-        "body": ".contentwrap .wlist",
-        "title": "div h1",
-        "author": "div .Desc span",
-        "date": "div .dt span",
-        "content": "div .conc p",
-        "lang": "id"
-    },
-    "aa":
-    {
-        "media": "aa.com.tr",
-        "category": "berita",
-        "index": ["http://aa.com.tr/id/headline-hari/"],
-        "list": ".articles #dvOtherContent article",
-        "link": "h3 a::attr('href')",
-        "body": "#main article",
-        "title": "header h1",
-        "author": "header p.post-meta span.fa-user a",
-        "date": "header p.post-meta span.fa-calendar",
-        "content": ".article-post-content p",
-        "lang": "id"
-    },
-    "bareksa":
-    {
-        "media": "bareksa.com",
-        "category": "berita",
-        "index": ["http://www.bareksa.com/id/articles_index/0/0/0"],
-        "list": "section.bodybase #indeks div ul li",
-        "link": ".content-indeks .content-title a::attr('href')",
-        "body": "section.bodybase .single-news",
-        "title": "h3.entry-title",
-        "author": ".post-header span.author",
-        "date": ".post-header span.date-header",
-        "content": ".entry-content p",
-        "lang": "id"
-    },
-    "beritahati":
-    {
-        "media": "beritahati.com",
-        "category": "berita",
-        "index": ["http://beritahati.com/berita/sorting/terbaru"],
-        "list": "#main-content-inner .main-content-bottom .column-b article",
-        "link": "a:first-child::attr('href')",
-        "body": "section.entry-box",
-        "title": ".entry-content font b",
-        "author": ".entry-content span",
-        "date": "header span.entry-date",
-        "content": ".entry-content p",
-        "lang": "id"
-    },
-    "dailysocial":
-    {
-        "media": "dailysocial.id",
-        "category": "berita",
-        "index": ["https://dailysocial.id/category/news"],
-        "list": "#news_content .item",
-        "link": "h3 a::attr('href')",
-        "body": "#sb-site article:nth-child(1)",
-        "title": "section#article-header h2 strong a",
-        "author": "section#article-meta span em a.trackthis",
-        "date": "section#article-meta span em",
-        "content": "section#article-content .post-content p",
-        "lang": "id"
-    },
-    "dw":
-    {
-        "media": "dw.com",
-        "category": "berita",
-        "index": ["http://www.dw.com/id/rubrik/s-11546"],
-        "list": "#bodyContent .news",
-        "link": "a::attr('href')",
-        "body": "#bodyContent ",
-        "title": "h1",
-        "author": ".longText p",
-        "date": ".group ul li:nth-child(1)",
-        "content": ".longText p",
-        "r_tag": [".gallery p"],
-        "lang": "id"
-    },
-    "dakta":
-    {
-        "media": "dakta.com",
-        "category": "berita",
-        "index": ["http://www.dakta.com/index"],
-        "list": "ul.ul_indeks li",
-        "link": "span.title_indeks a::attr('href')",
-        "body": ".main-content .itemView",
-        "title": ".itemHeader h2.itemTitle",
-        "author": ".itemEditor td",
-        "date": ".itemHeader span.date-opini",
-        "content": ".itemBody .itemIntroText div",
-        "lang": "id"
-    },
-    "cendananews":
-    {
-        "media": "cendananews.com",
-        "category": "berita",
-        "index": ["https://www.cendananews.com/?s="],
-        "list": ".td-main-content .item-details",
-        "link": "h3.entry-title a::attr('href')",
-        "body": ".td-main-content .td-ss-main-content article",
-        "title": ".td-post-header header.td-post-title h1.entry-title",
-        "author": ".td-post-header header.td-post-title p.td-post-sub-title",
-        "date": ".td-post-header header.td-post-title .td-module-meta-info span.td-post-date time.entry-date",
-        "content": ".td-post-content p",
-        "lang": "id"
-    },
-    "elshinta":
-    {
-        "media": "elshinta.com",
-        "category": "berita",
-        "index": ["https://elshinta.com/indeks"],
-        "list": "#main-container div#content ul li",
-        "link": "a::attr('href')",
-        "body": "#main-container #content",
-        "title": "h1",
-        "author": ".article p",
-        "date": "h3",
-        "content": ".article p",
-        "lang": "id"
-    },
-    "forumkeadilan":
-    {
-        "media": "forumkeadilan.com",
-        "category": "berita",
-        "index": ["https://forumkeadilan.com/index-berita/"],
-        "list": ".listing article",
-        "link": "h2.title a::attr('href')",
-        "body": ".single-container article",
-        "title": "h1 span",
-        "author": ".nothing",
-        "date": ".post-meta time.post-published b",
-        "content": ".entry-content p",
-        "lang": "id"
-    },
-    "goal":
-    {
-        "media": "goal.com",
-        "category": "berita",
-        "index": ["http://www.goal.com/id"],
-        "list": ".page-container section article.card",
-        "link": "a::attr('href')",
-        "body": ".page-container article .article-container",
-        "title": ".article-header header",
-        "author": ".author-details .name",
-        "date": ".actions-bar time",
-        "content": ".body p",
-        "lang": "id"
-    },
-    "hidayatullah":
-    {
-        "media": "hidayatullah.com",
-        "category": "berita",
-        "index": ["http://hidayatullah.com/"],
-        "list": ".block-latest ul li",
-        "link": "a::attr('href')",
-        "body": ".container .post",
-        "title": "h1.entry-title",
-        "author": ".entry-redaksi p.edt",
-        "date": ".entry-meta span.date",
-        "content": ".entry-content p",
-        "lang": "id"
-    },
-    "hipwee":
-    {
-        "media": "hipwee.com",
-        "category": "berita",
-        "index": ["https://www.hipwee.com/terbaru/"],
-        "list": "#magazine article ",
-        "link": "h2 a::attr('href')",
-        "body": "#st-container .col-content",
-        "title": ".article-title h1.title",
-        "author": ".article-title .article-entry a.author",
-        "date": ".article-title .article-entry span.date",
-        "content": ".post-content p",
-        "lang": "id"
-    },
-    "hukumonline":
-    {
-        "media": "hukumonline.com",
-        "category": "berita",
-        "index": ["http://www.hukumonline.com/berita/terbaru"],
-        "list": "#article-section .article-list .article",
-        "link": "a::attr('href')",
-        "body": "#article-section #article-content-section",
-        "title": "#article-detail-title",
-        "author": "#article-detail-author-share div[style=\"float: left;padding: 4px 0 0 10px;font-size: 12px;\"]",
-        "date": "#article-detail-date",
-        "content": "#article-content-1 p",
-        "lang": "id"
-    },
-    "harianamanah":
-    {
-        "media": "harianamanah.com",
-        "category": "berita",
-        "index": ["http://www.harianamanah.com/news"],
-        "list": "#page-content .news-category article",
-        "link": "a.captions::attr('href')",
-        "body": "#page-content",
-        "title": ".user-panel .judul h1",
-        "author": ".isi-berita p",
-        "date": ".info p.daftar-redaksi",
-        "content": ".isi-berita p",
-        "lang": "id"
-    },
-    "news.idntimes":
-    {
-        "media": "news.idntimes.com",
-        "category": "berita",
-        "index": ["https://news.idntimes.com/"],
-        "list": ".paper-content .paper",
-        "link": "header h3 a::attr('href')",
-        "body": ".container article#single",
-        "title": "header h1#article-header",
-        "author": ".article-info #author-top span.profilename b a",
-        "date": ".article-info div div.col-xs-6 div#author-top span.time",
-        "content": "#desc-article p",
-        "lang": "id"
-    },
-    "inews":
-    {
-        "media": "inews.id",
-        "category": "berita",
-        "index": ["http://www.inews.id/indeks"],
-        "list": ".news-feed ul#news-list li",
-        "link": "a:first-child::attr('href')",
-        "body": ".news-detail",
-        "title": "h2",
-        "author": ".body-text-news .text-news p:last-child",
-        "date": ".author",
-        "content": ".body-text-news .text-news p",
-        "lang": "id"
-    },
-    "itoday":
-    {
-        "media": "itoday.co.id",
-        "category": "berita",
-        "index": ["http://itoday.co.id/"],
-        "list": ".media-body h5.media-heading",
-        "link": "a::attr('href')",
-        "body": ".entry-box .entry-content .post",
-        "title": "h1",
-        "author": ".post-info p a",
-        "date": ".post-info p span.date",
-        "content": "p",
-        "r_tag": [".post-info p"],
-        "lang": "id"
-    },
-    "kabar":
-    {
-        "media": "kabar.news",
-        "category": "berita",
-        "index": ["http://kabar.news/indeks"],
-        "list": ".field-content .post-content",
-        "link": ".post-title a::attr('href')",
-        "body": ".content article .article-detail .post-content",
-        "title": "h1.post-title",
-        "author": ".post-meta a.username",
-        "date": ".post-meta .post-created",
-        "content": ".field p",
-        "lang": "id"
-    },
-    "kapanlagi":
-    {
-        "media": "kapanlagi.com",
-        "category": "berita",
-        "index": ["https://www.kapanlagi.com/"],
-        "list": "#home-mid-load .kl-artikel-berita p",
-        "link": "a::attr('href')",
-        "body": ".content-detail",
-        "title": "h1.entry-title",
-        "author": "span.reporter span a",
-        "date": "span.date-post",
-        "content": ".body-paragraph p",
-        "lang": "id"
-    },
-    "koran-jakarta":
-    {
-        "media": "koran-jakarta.com",
-        "category": "berita",
-        "index": ["http://www.koran-jakarta.com/category/terbaru"],
-        "list": ".container .slideshowpart .slideshowpoint",
-        "link": "a::attr('href')",
-        "body": ".mainbody .maincontent",
-        "title": "h1.entry-title",
-        "author": "p strong",
-        "date": "time.date_post",
-        "content": "p",
-        "lang": "id"
-    },
-    "marketing":
-    {
-        "media": "marketing.co.id",
-        "category": "berita",
-        "index": ["http://www.marketing.co.id/category/news-event/"],
-        "list": "ul.archive-col-list li",
-        "link": "a::attr('href')",
-        "body": "article#post-area",
-        "title": "header#post-header h1.post-title",
-        "author": "header#post-header .post-info-name span.author-name",
-        "date": "header#post-header .post-info-date time.post-date",
-        "content": "#content-main p span",
-        "lang": "id"
-    },
-    "menara62":
-    {
-        "media": "menara62.com",
-        "category": "berita",
-        "index": ["http://menara62.com/category/headline/"],
-        "list": ".item-details .entry-title",
-        "link": "a::attr('href')",
-        "body": ".td-ss-main-content article",
-        "title": "header h1.entry-title",
-        "author": "footer .author-box-wrap .author span.fn",
-        "date": "header time.entry-date",
-        "content": ".td-post-content p",
-        "lang": "id"
-    },
-    "migasreview":
-    {
-        "media": "migasreview.com",
-        "category": "berita",
-        "index": ["http://www.migasreview.com/news"],
-        "list": ".mr-post-list h4",
-        "link": "a::attr('href')",
-        "body": ".mr-post-detil",
-        "title": "h2.mr-data-header",
-        "author": ".mr-post-writer",
-        "date": ".mr-post-writer",
-        "content": ".mr-post-content-detil p",
-        "lang": "id"
-    },
-    "monexnews":
-    {
-        "media": "monexnews.com",
-        "category": "berita",
-        "index": ["http://www.monexnews.com/index-news.htm"],
-        "list": ".items li",
-        "link": "a::attr('href')",
-        "body": "#publicNews-read",
-        "title": "#main h1",
-        "author": ".nothing",
-        "date": "abbr.published",
-        "content": ".entry-content p",
-        "lang": "id"
-    },
-    "nationalgeographic":
-    {
-        "media": "nationalgeographic.co.id",
-        "category": "berita",
-        "index": ["http://nationalgeographic.co.id/berita"],
-        "list": "main #latest15 ul li",
-        "link": "a::attr('href')",
-        "body": "main #article",
-        "title": "#article_head h1",
-        "author": "#bodycontent p.article_credit",
-        "date": "#meta",
-        "content": "#bodycontent p",
-        "lang": "id"
-    },
-    "neraca":
-    {
-        "media": "neraca.co.id",
-        "category": "berita",
-        "index": ["http://www.neraca.co.id/kategori/bisnis-indonesia"],
-        "list": ".rubrik .section2 h4",
-        "link": "a::attr('href')",
-        "body": ".article",
-        "title": "h1",
-        "author": ".entry-meta span strong",
-        "date": ".entry-meta span:nth-child(2)",
-        "content": ".section2 p",
-        "lang": "id"
-    },
-    "opini":
-    {
-        "media": "opini.id",
-        "category": "berita",
-        "index": ["https://opini.id/fresh"],
-        "list": "#freshContents .content-list-home",
-        "link": "a::attr('href')",
-        "body": "#article-section #article-content-section",
-        "title": "#article-detail-title",
-        "author": "#article-detail-author-share div[style=\"float: left;padding: 4px 0 0 10px;font-size: 12px;\"]",
-        "date": "#article-detail-date",
-        "content": "#article-content-1 p",
-        "lang": "id"
-    },
-    "panjimas":
-    {
-        "media": "panjimas.com",
-        "category": "berita",
-        "index": ["http://www.panjimas.com/?s="],
-        "list": ".post-content h2",
-        "link": "a::attr('href')",
-        "body": ".single-area",
-        "title": ".post-meta h1.title",
-        "author": ".entry p",
-        "date": ".post-meta",
-        "content": ".entry p",
-        "r_tag": ["p.jp-relatedposts-post"],
-        "lang": "id"
-    },
-    "pojoksatu":
-    {
-        "media": "pojoksatu.id",
-        "category": "berita",
-        "index": ["http://pojoksatu.id"],
-        "list": ".post-data header h3",
-        "link": "a::attr('href')",
-        "body": ".single_post",
-        "title": "header h1",
-        "author": ".post-info span.theauthor a.fn",
-        "date": ".breadcrumb span.thetime",
-        "content": ".entry-content p",
-        "lang": "id"
-    },
-    "sayangi":
-    {
-        "media": "sayangi.com",
-        "category": "berita",
-        "index": ["http://www.sayangi.com/news"],
-        "list": "h3",
-        "link": "a::attr('href')",
-        "body": "article",
-        "title": "header h1",
-        "author": ".td-post-author-name a",
-        "date": ".td-post-date time",
-        "content": ".td-post-content p",
-        "lang": "id"
-    },
-    "sp.beritasatu":
-    {
-        "media": "sp.beritasatu.com",
-        "category": "berita",
-        "index": ["http://sp.beritasatu.com/pages/index/"],
-        "list": "#contentwrapper ul li",
-        "link": "a::attr('href')",
-        "body": "#contentwrapper",
-        "title": " span.headline",
-        "author": "#bodytext p",
-        "date": "p span.caption",
-        "content": "#bodytext p",
-        "lang": "id"
-    },
-    "suarasurabaya":
-    {
-        "media": "suarasurabaya.net",
-        "category": "berita",
-        "index": ["http://www.suarasurabaya.net/news_content.php?page=1&per_page=10&rubrikid=news"],
-        "list": "#content_page .listnews",
-        "link": "a::attr('href')",
-        "body": "#pages_left",
-        "title": ".content h1",
-        "author": ".content .editor",
-        "date": ".content .tglnews",
-        "content": ".content",
-        "lang": "id"
-    },
-    "swa":
-    {
-        "media": "swa.co.id",
-        "category": "berita",
-        "index": ["https://swa.co.id/"],
-        "list": "#latest-news h4",
-        "link": "a::attr('href')",
-        "body": "#single-post .container",
-        "title": ".content-head h2",
-        "author": ".content-head .post-meta span.meta-author a",
-        "date": ".content-head .post-meta span.meta-date",
-        "content": ".content-body .the-content p",
-        "lang": "id"
-    },
-    "stabilitas":
-    {
-        "media": "stabilitas.co.id",
-        "category": "berita",
-        "index": ["http://stabilitas.co.id/home/newsindex"],
-        "list": "#freshContents .content-list-home",
-        "link": "a::attr('href')",
-        "body": "#article-section #article-content-section",
-        "title": "#article-detail-title",
-        "author": "",
-        "date": "#article-detail-date",
-        "content": "#article-content-1 p",
-        "lang": "id"
-    },
-    "id.techinasia":
-    {
-        "js": true,
-        "media": "id.techinasia.co.id",
-        "category": "berita",
-        "index": ["https://id.techinasia.com/"],
-        "list": "article.post-list__item h2.post-list__title",
-        "link": "a::attr('href')",
-        "body": ".post__wrapper",
-        "title": "h1",
-        "author": ".post-meta li:nth-child(2) a",
-        "date": ".post-meta li:nth-child(2) .post-meta__date",
-        "content": ".post__content p",
-        "lang": "id"
-    },
-    "uzone":
-    {
-        "media": "uzone.id",
-        "category": "berita",
-        "index": ["http://uzone.id/"],
-        "list": ".content-box-news-list",
-        "link": "a::attr('href')",
-        "body": ".box-content",
-        "title": "h1",
-        "author": "span.text-red a",
-        "date": "small:nth-child(2)",
-        "content": ".box-content-news-description p",
-        "lang": "id"
-    },
-    "wartaekonomi":
-    {
-        "media": "wartaekonomi.co.id",
-        "category": "berita",
-        "index": ["https://www.wartaekonomi.co.id"],
-        "list": ".news-title",
-        "link": "a::attr('href')",
-        "body": ".news-post",
-        "title": ".news-post-title h2",
-        "author": " .news-post-source p:nth-child(3) .text-red",
-        "date": ".news-post-date span",
-        "content": ".news-post-content p",
-        "lang": "id"
-    },
-    "wartakota":
-    {
-        "media": "wartakota.com",
-        "category": "berita",
-        "index": ["http://wartakota.tribunnews.com"],
-        "list": "ul#latestul li.art-list h3",
-        "link": "a::attr('href')",
-        "body": "#article",
-        "title": "h1",
-        "author": ".side-article p",
-        "date": "time",
-        "content": ".side-article p",
-        "paging":[".pagination"],
-        "lang": "id"
-    },
-    "wartapilihan":
-    {
-        "media": "wartapilihan.com",
-        "category": "berita",
-        "index": ["http://www.wartapilihan.com/category/headlines/"],
-        "list": ".item-details h3",
-        "link": "a::attr('href')",
-        "body": "article",
-        "title": "h1",
-        "author": ".td-module-meta-info .td-post-author-name a",
-        "date": ".td-post-date time",
-        "content": ".td-post-content p",
-        "lang": "id"
     }
-    
 
 }

@@ -1,72 +1,63 @@
 #!/usr/bin/python
+from six.moves.urllib.parse import urljoin
+
 import scrapy
 from scrapy.selector import Selector
+from scrapy.utils.python import to_native_str
+from scrapy_splash import SplashRequest
+
 import re
 import hashlib
 import json
 from urlparse import urlparse
 from w3lib.html import remove_tags, remove_tags_with_content
 from scrapy.crawler import CrawlerProcess  # For Testing config
-from deteksi import deteksi
-import sys
-from datetime import datetime
 import os
+import shutil
+from datetime import datetime
 
-from stem import Signal
-from stem.control import Controller
 # import unicodedata
+from deteksi import deteksi
+from datetime import datetime
+import json
+import sys
+
 
 with open('config.json', 'r') as f:
 	config = json.load(f)
 
-# print "================= INDEX MEDIA ======================"
-# print "Choose your media :"
-# print config.keys()
-# print "===================================================="
-
-# i_config = raw_input("Choose Media: ")
-
 deteksi = deteksi()
 
-i_config = sys.argv[1]
+i_config = ''
+target = {}
+
 t_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S').replace(' ','_').replace(':','_')
 
 # o_config = 'data/'+i_config+'__'+t_now+'.json'
-o_config = 'data/'+i_config+'.json'
-
-
-target = config[i_config]
-try:		
-	open("log.txt","w").close()
-	open(o_config,"w").close()
-except IOError:
-	pass				
-
-
-# try:
-# 	proxy = target["proxy"]
-# 	os.environ["http_proxy"] = proxy
-# except KeyError:
-# 	pass
+#o_config = 'data/'+i_config+'.json'
 
 try:
-	target["mobile"]
-	u_agent = 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
-except KeyError:
-	u_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'
+	shutil.rmtree('temp')				
+except (IOError,OSError):
+	pass
+				
+try:
+	# shutil.rmtree('temp')				
+	open("log.txt","w").close()
+	#open(o_config,"w").close()
+except IOError:
+	pass
 
+#You can also check it get help for you
 
-def _set_new_ip():
-    with Controller.from_port(port=9051) as controller:
-        # controller.authenticate(password='tor_password')
-        controller.signal(Signal.NEWNYM)
-
-class s_Item(scrapy.Item):
-    content = scrapy.Field()
-
+if not os.path.isdir('data'):
+	os.system('mkdir data')
+if not os.path.isdir('temp'):
+	os.system('mkdir temp')
+	
 class MainMediaSpider(scrapy.Spider):
 	name = 'mainmediaspider'
-	handle_httpstatus_list = [301,404,503]
+	handle_httpstatus_list = [301,404,503,504]
 
 	def log(self,t):
 		file = open('log.txt', 'a')
@@ -82,10 +73,10 @@ class MainMediaSpider(scrapy.Spider):
 	def synopsis(self, s):
 		for x in s:
 			if len(x) > 50:
-			    return x#.replace(' - ', '')
-			    break
+				return x#.replace(' - ', '')
+				break
 			else:
-			    continue
+				continue
 			break
 
 # ================= END ======================== #
@@ -98,6 +89,13 @@ class MainMediaSpider(scrapy.Spider):
 # ============================================== #
 
 	def start_requests(self):
+		# print self.settings.get('USE_MOBILE')
+		print '======================='
+		print self.settings.get('media')
+		
+		i_config = self.settings.get('media')
+		target = config[i_config]		
+
 		urls = target["index"] # Must be array type
 
 		try:
@@ -107,19 +105,44 @@ class MainMediaSpider(scrapy.Spider):
 
 		for url in urls:
 			# self.log(url)
-			request = scrapy.Request(url=url, method=method, callback=self.parse)
-			# try:
-			# 	# _set_new_ip()
-			# 	# request.meta['proxy'] = 'http://127.0.0.1:9051'
-			# 	# proxy = target["proxy"]
-			# 	# request.meta['proxy'] = proxy
-			# except KeyError:
-			# 	pass
+			try:
+				target["js"]
+				request = SplashRequest(url, self.parse,
+				endpoint='render.html',
+				args={'wait': 0.5},
+				)
+			except KeyError:
+				request = scrapy.Request(url=url, method=method, callback=self.parse)
 
 			# self.log(request.meta['proxy'])
 			yield request
 
 	def parse(self, response):
+		# handle redirection
+		# this is copied/adapted from RedirectMiddleware
+
+		i_config = self.settings.get('media')
+		target = config[i_config]		
+		
+		if response.status >= 300 and response.status < 400:
+			# HTTP header is ascii or latin1, redirected url will be percent-encoded utf-8
+			location = to_native_str(response.headers['location'].decode('latin1'))
+
+			# get the original request
+			request = response.request
+			# and the URL we got redirected to
+			redirected_url = urljoin(request.url, location)
+
+			if response.status in (301, 307) or request.method == 'HEAD':
+				redirected = request.replace(url=redirected_url)
+				yield redirected
+			else:
+				redirected = request.replace(url=redirected_url, method='GET', body='')
+				redirected.headers.pop('Content-Type', None)
+				redirected.headers.pop('Content-Length', None)
+				yield redirected
+			# ========================================== Function for Testing error 301 ============================================ #
+
 		try:
 			xpath = target["xpath_list"]
 			lists = response.xpath(xpath).css(target["list"])
@@ -130,23 +153,44 @@ class MainMediaSpider(scrapy.Spider):
 		for article_list in lists:
 			nextUrl = article_list.css(target["link"]).extract_first()
 			if nextUrl is not None:
-			# 	request = scrapy.Request(url=nextUrl, callback=self.parseDetail)
-			# 	# yield response.follow(nextUrl, self.parseDetail)
-				# self.log(nextUrl)
-			# 	try:
-			# 		proxy = target["proxy"]
-			# 		request.meta['proxy'] = proxy
-			# 	except KeyError:
-			# 		pass
-
-				# yield request
 				yield response.follow(nextUrl, self.parseDetail)
+				# yield scrapy.Request(url=nextUrl, callback=self.parseDetail)
 
-			# else:
-			# 	pass
+
+	def parsePaging(self,response):
+		i_config = self.settings.get('media')
+		target = config[i_config]		
+
+		f = response.meta['f']
+		t_content = target['content']
+		# self.log(response.meta)
+		return deteksi.p_content(response, t_content, f)
 
 	def parseDetail(self, response):
-		# self.log(response.status)
+		i_config = self.settings.get('media')
+		target = config[i_config]		
+
+		# handle redirection
+		# this is copied/adapted from RedirectMiddleware
+		if response.status >= 300 and response.status < 400:
+
+			# HTTP header is ascii or latin1, redirected url will be percent-encoded utf-8
+			location = to_native_str(response.headers['location'].decode('latin1'))
+
+			# get the original request
+			request = response.request
+			# and the URL we got redirected to
+			redirected_url = urljoin(request.url, location)
+
+			if response.status in (301, 307) or request.method == 'HEAD':
+				redirected = request.replace(url=redirected_url)
+				yield redirected
+			else:
+				redirected = request.replace(url=redirected_url, method='GET', body='')
+				redirected.headers.pop('Content-Type', None)
+				redirected.headers.pop('Content-Length', None)
+				yield redirected
+			# ========================================== Function for Testing error 301 ============================================ #
 
 		regex = re.compile(r'[\n\r\t]')
 
@@ -157,7 +201,6 @@ class MainMediaSpider(scrapy.Spider):
 			body = response.css(target["body"])
 
 		tautan = None
-		# self.log(response.css(".container .news-read .article .chatNews #lifeSocial").extract())
 
 
 		for content in body:
@@ -171,8 +214,11 @@ class MainMediaSpider(scrapy.Spider):
 				# kanal = parsed_uri[2].split('/')[1]  # from config or url
 
 				kode = self.id_hash(tautan)
+				try:
+					os.remove('temp/'+kode+'.txt')
+				except (IOError,OSError):
+					pass
 
-				# self.log(content.css("article div.lf-ghost"))
 				judul = ''.join(content.css(target["title"]).css('::text').extract())
 				judul = re.sub(regex,'',judul).strip()
 
@@ -180,75 +226,59 @@ class MainMediaSpider(scrapy.Spider):
 				penulis = deteksi.c_editor(content.css(target["author"]).css('::text').extract(), i_config)
 				# ==================  START : Testing Remove Script from Content ===================== #
 
-				# if target["paging"] is not None:
-				# 	paging = target["paging"]
-				# 	p_URL = response.css(paging[0]).extract()[1:-1]
-				# 	isi = content.css(target["content"])
-				# 	for p in p_URL:
-				# 		# c = deteksi.p_content(p,target["content"])
-				# 		c = Request(response.urljoin(p),callback=deteksi.p_content, meta={'t_content':target["content"]})
-				# 		self.log(c.callback)
-				# else :
-				# 	isi = content.css(target["content"]).extract()
+				isi = content.css(target["content"]).extract()
+				# self.log(isi)
+
 
 				try:
 					page = target["paging"]
 					page = response.css('.pagination a::attr("href")').extract()
-					try:
-						del page[-1]
-						# item = response.meta['item']
-						item = s_Item()
-						request = scrapy.Request(url=page[0],callback=deteksi.p_link)
-						# request = deteksi.p_link(page[0])
-						request.meta['item'] = item
-						yield request
-						
-						self.log(item)
-						self.log(request.meta['item'])
-					except IndexError:
-						pass
-					# page = deteksi.p_link(scrapy,page,target["content"])
+					for x in page:
+
+						try:
+							del page[-1]
+							request = scrapy.Request(url=x,callback=self.parsePaging,meta={'f': kode})
+							yield request
+							# self.log(x)
+							try:
+								isi = open(kode+'.txt', 'r').readlines()
+								# self.log(isi)
+							except IOError: 
+								pass
+						except IndexError:
+							pass
+					# for try finding editor in content with paging
+					# penulis = deteksi.c_editor(isi, i_config)
+
 				except KeyError:
 					pass
 
 
-				isi = content.css(target["content"]).extract()
-				# self.log(isi)
 				try:
 					for x in target["r_index"]:
 						i = deteksi.f_index(isi,x)
 						for li in i:
-							del isi[li]
-						# self.log(x)
+							try:
+								deteksi.r_index(isi,x)
+
+							except IndexError:
+								pass
 				except KeyError:
 					pass
 
-				# isi = unicode(''.join(isi))
-				# self.log(isi)
 				isi = deteksi.s_undecode(''.join(isi))
 				try:
 					for x in target["r_tag"]:
 						r_tag = content.css(x).extract()
-						# self.log(content.css(x))
 						for r in r_tag:
 							t = unicode(''.join(r))
-							# t = t.encode('ascii', 'ignore').decode('unicode_escape')
 							t = deteksi.s_undecode(''.join(r)).replace('(','\(').replace(')','\)').replace('/','\/').replace('+','\+')
-							# t = re.escape(t)
-							# t = re.sub(r'[()]')
-							# isi = re.escape(isi)
 							isi = re.sub(t,'',isi)
-							# isi = deteksi.s_undecode(isi)
-							# isi = deteksi.s_undecode(re.escape(t))
-							# self.log(t)
-							# self.log(isi)
 				except KeyError:
 					pass
 				
 				isi = remove_tags_with_content(isi, ('script','style'))
 				
-				# isi = Selector(text=isi).xpath('//text()').extract()
-				# self.log(isi)
 				# ================== END : Testing Remove Script from Content ===================== #
 
 				try:
@@ -283,31 +313,10 @@ class MainMediaSpider(scrapy.Spider):
 				isi = re.sub(regex,'',isi).strip()
 
 				tanggal = deteksi.c_date(content.css(target["date"]).css('::text').extract(), i_config)
-				# self.log(tanggal)
 
 				bahasa = target["lang"]
 
 				if isi is not "" :
 					yield {'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sinopsis, 'media': domain, 'kanal': kanal, 'lang': bahasa}
-					# yield {'id': tes}
 				else:
 					self.log({'id': kode, 'url': tautan, 'title': judul, 'date': tanggal, 'editor': penulis, 'content': isi, 'synopsis': sinopsis, 'media': domain, 'kanal': kanal, 'lang': bahasa})
-
-# For Testing config with different format
-
-process = CrawlerProcess({
-	'USER_AGENT': u_agent,
-	# 'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36',
-	'FEED_FORMAT': 'json',
-	'FEED_URI': o_config,
-	'DOWNLOAD_DELAY' : 1.0,
-	'AUTOTHROTTLE_ENABLED' : True
-})
-
-process.crawl(MainMediaSpider)
-process.start()  # the script will block here until the crawling is finished
-
-# s_file = os.stat(o_config).st_size
-# if s_file == 0:
-# 	open(o_config,"rb").close()
-# 	os.remove(o_config)
